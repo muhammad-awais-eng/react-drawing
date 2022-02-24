@@ -1,0 +1,75 @@
+* {
+  font-family: sans-serif;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+  height: 90vh;
+  width: 100%;
+}
+.form__container {
+  margin-top: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 30px 50px 30px;
+  width: 28%;
+  border: #84a9d4 solid 1px;
+  background-color: #001c3a;
+  box-shadow: -1px 1px 10px 1px rgb(161, 148, 148);
+  border-radius: 20px;
+}
+.form__container h1 {
+  font-size: 40px;
+  color: #ee1919;
+  align-items: center;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.field {
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+.field button {
+  background: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 40px;
+  font-size: 1.2rem;
+  background-color: #ee1919;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 320px;
+  color: #fff;
+  text-transform: uppercase;
+}
+.container input {
+  border: 1px solid rgb(197, 188, 188);
+  border-radius: 4px;
+  padding: 8px;
+  width: 300px;
+  height: 30px;
+  align-items: flex-start;
+  background-color: #263e58;
+  color: #fff;
+}
+.container input::placeholder {
+  color: rgb(253, 249, 249);
+}
+
+.field span {
+  text-align: start;
+  align-items: flex-start;
+  width: 140px;
+  font-size: 13px;
+  color: #fff;
+  text-transform: capitalize;
+}
