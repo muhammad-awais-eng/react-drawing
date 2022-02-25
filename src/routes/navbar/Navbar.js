@@ -17,6 +17,9 @@ function Navbar() {
             <Link to='/'> Connection screen </Link>
           </div>
           <div className='nav__item'>
+            <Link to='/dblist'> DB List</Link>
+          </div>
+          <div className='nav__item'>
             <Link to='/list'> Connection screen </Link>
           </div>
           <div className='nav__item'>
