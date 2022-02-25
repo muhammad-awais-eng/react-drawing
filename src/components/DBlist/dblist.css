@@ -1,7 +1,7 @@
 .db_container {
   width: 60%;
   margin: 5px;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   border: 1px solid #333;
   background-color: #ddd;
   border-radius: 5px;
@@ -51,4 +51,57 @@
   background-color: #00695c;
   box-shadow: 0 0 5px #263238;
   color: #fff;
+}
+
+.check__db__connection {
+  height: 30vh;
+  width: 20%;
+  position: absolute;
+  top: 28%;
+  left: 38%;
+  border-radius: 20px;
+  background-color: #3d6964;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.db_connection_wrapper {
+  display: flex;
+  height: 70px;
+  width: 80%;
+  align-items: center;
+  justify-content: space-around;
+  padding-left: 20px;
+}
+.db_connection_wrapper div {
+  width: 20%;
+  color: #fff;
+}
+.db_connection_wrapper input {
+  width: 60%;
+  padding: 10px;
+  height: 12px;
+  border: none;
+  color: #722727;
+  border-radius: 10px;
+}
+.wrapper__btn {
+  display: flex;
+  width: 70%;
+  justify-content: center;
+  margin-top: 20px;
+  margin-left: 90px;
+}
+.wrapper__btn button {
+  width: 80px;
+  padding: 5px;
+  border-radius: 5px;
+}
+.cancel__btn {
+  background-color: #fcfcfc;
+  margin-right: 20px;
+}
+.submit__btn {
+  background-color: #a1c914;
 }
