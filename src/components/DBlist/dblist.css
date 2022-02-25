@@ -1,55 +1,63 @@
 .db_container {
   width: 60%;
   margin: 5px;
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-  border: 1px solid #333;
-  background-color: #ddd;
+  font-family: 'Poppins', sans-serif;
   border-radius: 5px;
   margin: 20px auto;
   padding: 10px;
+  border-radius: 10px;
 }
 .dbhead {
   color: #6a1b9a;
   padding: 5px;
+  font-family: 'Poppins', sans-serif;
   font-size: 36px;
-  font-weight: bold;
+  font-weight: 400;
   text-align: center;
 }
 .db_table {
   padding: 10px;
-  border: 1px solid #9e9e9e;
+  border: 1px solid #eee;
   width: 90%;
-  margin: 5px auto;
+  margin: 10px auto;
+  background-color: #fff;
   flex-direction: column;
+  border-radius: 5px;
+  box-shadow: -3px 3px 5px #ccc;
 }
 .db_table_button {
-  background-color: #263238;
-  color: #f3f3f3;
-  font-weight: 300;
+  background-color: #bdbdbd;
+  color: #222;
+  font-weight: 400;
   border-radius: 5px;
   width: 250px;
   padding: 20px 25px;
   cursor: pointer;
-  border: 1px solid #263238;
+  border: none;
 }
 .db_table_button_right {
   background-color: #263238;
   color: #f3f3f3;
-  font-weight: 300;
+  font-weight: 400;
   width: 150px;
   padding: 10px 15px;
   cursor: pointer;
   border: 1px solid #263238;
   float: right;
+  margin-right: 2px;
+  vertical-align: middle;
+  margin-top: 10px;
+  border-radius: 5px;
 }
 .db_table_button:hover {
-  background-color: #c51162;
+  background-color: #6a1b9a;
   box-shadow: 0 0 5px #263238;
   color: #fff;
 }
 .db_table_button_right:hover {
-  background-color: #00695c;
-  box-shadow: 0 0 5px #263238;
+  background-color: #00c853;
+  box-shadow: -2px 2px 5px #263238;
+  border: none;
   color: #fff;
 }
 
@@ -60,7 +68,8 @@
   top: 28%;
   left: 38%;
   border-radius: 20px;
-  background-color: #3d6964;
+  background-color: #90caf9;
+  box-shadow: -5px 5px 15px #999;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -76,15 +85,17 @@
 }
 .db_connection_wrapper div {
   width: 20%;
-  color: #fff;
+  color: #333;
 }
 .db_connection_wrapper input {
   width: 60%;
   padding: 10px;
   height: 12px;
   border: none;
-  color: #722727;
+  font-weight: 400;
+  color: #333;
   border-radius: 10px;
+  text-transform: uppercase;
 }
 .wrapper__btn {
   display: flex;
@@ -100,8 +111,10 @@
 }
 .cancel__btn {
   background-color: #fcfcfc;
+  border: none;
   margin-right: 20px;
 }
 .submit__btn {
-  background-color: #a1c914;
+  background-color: #00c853;
+  border: none;
 }
