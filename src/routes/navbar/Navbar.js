@@ -9,7 +9,7 @@ function Navbar() {
         <div className='left_logo'>
           <div className='logo'>
             {' '}
-            <Link to='/'>Demo</Link>
+            <Link to='/'>QORE CONNECT</Link>
           </div>
         </div>
         <div className='rightOption'>
