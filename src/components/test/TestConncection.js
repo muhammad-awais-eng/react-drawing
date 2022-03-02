@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import CancelPresentationIcon from "@mui/icons-material/CancelPresentation";
+import DoneIcon from "@mui/icons-material/Done";
+import ClearIcon from "@mui/icons-material/Clear";
 import "./Test.css";
+
+import FormControl from "@mui/material/FormControl";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 const TestConncection = () => {
   const [connectionData, setConnectionData] = useState({
@@ -12,16 +31,16 @@ const TestConncection = () => {
     db_user: "",
     db_password: "",
     db_schema: "",
+    db_name: "",
   });
   const [connectionName, setConnectionName] = useState("");
+  const [successMessage, setSuccessMessage] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dbCollection, setDbCollection] = useState(["mysql", "redshift"]);
 
   const handleConnectionSubmit = (e) => {
     e.preventDefault();
 
-    // const body = {
-    //   source_credentials: connectionData,
-    //   target_credentials: {},
-    // };
     const body = connectionData;
     console.log(body);
     try {
@@ -34,6 +53,7 @@ const TestConncection = () => {
         })
         .then((response) => {
           console.log(response.data);
+
           checkConnection();
         })
         .catch((error) => {
@@ -58,12 +78,14 @@ const TestConncection = () => {
           },
         })
         .then((response) => {
-          alert(response.data.status);
+          setSuccessMessage(true);
+          setIsModalOpen(true);
           console.log(response.data);
         })
         .catch((error) => {
           console.log(error);
-          alert("please check your credientials");
+          setSuccessMessage(false);
+          setIsModalOpen(true);
         });
     } catch (e) {
       console.log(e);
@@ -71,8 +93,62 @@ const TestConncection = () => {
   };
   return (
     <div className="container">
+      {isModalOpen ? (
+        successMessage ? (
+          <div className="success__message">
+            <div className="check__icon">
+              <div>
+                <DoneIcon className="starBorderOutlined" />
+              </div>
+            </div>
+            <div className="header__message">
+              <h1>Success </h1>
+              <span>Connection SuccessFul </span>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSuccessMessage(false);
+                }}
+              >
+                ok
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="success__message">
+            <div className="warn__icon">
+              <div>
+                <ClearIcon className="starBorderOutlined" />
+              </div>
+            </div>
+            <div className="header__message">
+              <h1 style={{ color: "#8d0101" }}>Failed </h1>
+              <span>please check your crediential </span>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                }}
+              >
+                ok
+              </button>
+            </div>
+          </div>
+        )
+      ) : null}
+
       <form className="form__container" onSubmit={handleConnectionSubmit}>
         <h1>Test Conncection</h1>
+        <div className="field">
+          <span>connection name</span>
+          <input
+            type="text"
+            placeholder="Connection Name"
+            value={connectionName}
+            onChange={(e) => {
+              setConnectionName(e.target.value);
+            }}
+          />
+        </div>
         <div className="field">
           <span>source type</span>
           <input
@@ -89,17 +165,23 @@ const TestConncection = () => {
         </div>
         <div className="field">
           <span>source name</span>
-          <input
-            type="text"
-            placeholder="source name"
-            value={connectionData.source_name}
-            onChange={(e) => {
-              setConnectionData({
-                ...connectionData,
-                source_name: e.target.value,
-              });
-            }}
-          />
+          <div className="select">
+            <select
+              name="select__field"
+              className="select__field"
+              value={connectionData.source_name}
+              onChange={(e) =>
+                setConnectionData({
+                  ...connectionData,
+                  source_name: e.target.value,
+                })
+              }
+            >
+              <option value="a">Choose option ...</option>
+              <option value="mysql">My SQL</option>
+              <option value="redshift">Redshift</option>
+            </select>
+          </div>
         </div>
         <div className="field">
           <span>ip address</span>
@@ -166,18 +248,29 @@ const TestConncection = () => {
           />
         </div>
         <div className="field">
-          <span>connection name</span>
+          <span>DB Name</span>
+
           <input
             type="text"
-            placeholder="Connection Name"
-            value={connectionName}
+            disabled={connectionData.source_name !== "mysql" ? false : true}
+            placeholder="DB Name"
+            value={connectionData.db_name}
             onChange={(e) => {
-              setConnectionName(e.target.value);
+              setConnectionData(
+                connectionData.source_name !== "mysql"
+                  ? { ...connectionData, db_name: e.target.value }
+                  : null
+              );
             }}
           />
         </div>
+
         <div className="field">
-          <span></span>
+          <span>
+            <button style={{ backgroundColor: "#ee1919", padding: "8px" }}>
+              Reset
+            </button>
+          </span>
           <button type="submit">Submit</button>
         </div>
       </form>

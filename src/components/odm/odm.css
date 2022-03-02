@@ -1,0 +1,104 @@
+.odm__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  text-align: left;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 90vh;
+}
+.odm__source__table {
+  width: 30%;
+  text-align: left;
+  border: 1px solid rgb(197, 187, 187);
+  background-color: rgb(247, 239, 239);
+}
+.source__column {
+  background-color: "red";
+  display: flex;
+  border-top: 1px solid rgb(223, 205, 205);
+  min-height: 35px;
+  align-items: center;
+}
+.source_db_select {
+  text-align: left;
+  padding: 20px;
+  margin: 2px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  background-color: rgb(221, 218, 201);
+}
+.target_db_select {
+  text-align: left;
+  padding: 20px;
+  padding-left: 5%;
+  margin: 2px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  background-color: rgb(221, 218, 201);
+}
+#demo-multiple-name-label {
+  color: #000;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.source__table__list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  min-height: 30px;
+  align-items: center;
+  padding-left: 10px;
+  background-color: rgb(226, 220, 220);
+}
+.target__table__list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  min-height: 30px;
+  align-items: center;
+  border-top: 1px solid rgb(211, 208, 208);
+  padding-left: 10px;
+  background-color: rgb(226, 220, 220);
+}
+.mw-120 {
+  min-height: 10px;
+  display: none;
+  color: rgb(125, 129, 125);
+}
+
+.source__column__list {
+  background-color: rgb(223, 207, 207);
+}
+.target__column__list {
+  background-color: rgb(223, 207, 207);
+  border: 1px solid rgb(224, 218, 218);
+}
+.sourceColumn {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  padding-left: 35px;
+  border: 1px solid rgb(224, 218, 218);
+}
+.targetColumn {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  padding-left: 35px;
+}
+.odm__target__table {
+  width: 70%;
+  text-align: left;
+  background-color: rgb(247, 239, 239);
+  border-left: 1px solid black;
+}
+
+.odm__target__table h1,
+.odm__source__table h1 {
+  font-weight: bold;
+  text-align: center;
+  text-decoration: underline;
+  text-transform: uppercase;
+}
