@@ -116,20 +116,21 @@ const TestConncection = () => {
           </div>
         ) : (
           <div className="success__message">
-            <div className="warn__icon">
+            {/* <div className="warn__icon">
               <div>
                 <ClearIcon className="starBorderOutlined" />
               </div>
-            </div>
+            </div> */}
             <div className="header__message">
-              <h1 style={{ color: "#8d0101" }}>Failed </h1>
+              <h1 style={{ color: "#b65454" }}>Failed </h1>
               <span>please check your crediential </span>
               <button
+                style={{ backgroundColor: "#b65454", padding: "2px" }}
                 onClick={() => {
                   setIsModalOpen(false);
                 }}
               >
-                ok
+                continue
               </button>
             </div>
           </div>
@@ -265,7 +266,7 @@ const TestConncection = () => {
           />
         </div>
 
-        <div className="field">
+        <div className="buttonArea">
           <span>
             <button style={{ backgroundColor: "#ee1919", padding: "8px" }}>
               Reset

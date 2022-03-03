@@ -56,8 +56,14 @@ function DBlist() {
   };
 
   useEffect(() => {
+    dbConnectionList();
+  }, []);
+
+  const dbConnectionList = async () => {
+    setDbData([]);
+    setDbCollection([]);
     try {
-      axios
+      await axios
         .get("/v1/list_db_connections", {
           headers: {
             "X-User-ID": 1,
@@ -78,96 +84,133 @@ function DBlist() {
     } catch (e) {
       console.log(e);
     }
-  }, []);
+  };
+
+  const deletedbConnection = async (dbName) => {
+    console.log("dbName", dbName);
+    const data = JSON.stringify({
+      connection_name: dbName,
+    });
+
+    try {
+      await axios
+        .delete("/v1/db_connection", {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+          data: {
+            connection_name: dbName,
+          },
+        })
+        .then((response) => {
+          dbConnectionList();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
-    <div className="db_container">
-      <h1 className="dbhead"> Database Connection </h1>
-      {isModalOpen ? (
-        successMessage ? (
-          <div className="success__message">
-            <div className="check__icon">
-              <div>
-                <DoneIcon className="starBorderOutlined" />
+    <div className="wrapper__container__list">
+      <div className="db_container">
+        <h1 className="dbhead"> Database Connection </h1>
+        {isModalOpen ? (
+          successMessage ? (
+            <div className="success__message">
+              <div className="check__icon">
+                <div>
+                  <DoneIcon className="starBorderOutlined" />
+                </div>
+              </div>
+              <div className="header__message">
+                <h1>Success </h1>
+                <span>Connection SuccessFul </span>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                  }}
+                >
+                  ok
+                </button>
               </div>
             </div>
-            <div className="header__message">
-              <h1>Success </h1>
-              <span>Connection SuccessFul </span>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                }}
-              >
-                ok
-              </button>
+          ) : (
+            <div className="success__message">
+              <div className="header__message">
+                <h1 style={{ color: "#8d0101" }}>Failed </h1>
+                <span style={{ fontSize: "12px" }}>
+                  please check your crediential{" "}
+                </span>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                  }}
+                >
+                  ok
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="success__message">
-            <div className="header__message">
-              <h1 style={{ color: "#8d0101" }}>Failed </h1>
-              <span style={{ fontSize: "12px" }}>
-                please check your crediential{" "}
-              </span>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                }}
-              >
-                ok
-              </button>
-            </div>
-          </div>
-        )
-      ) : null}
+          )
+        ) : null}
 
-      {checkConnection ? (
-        <div className="check__db__connection">
-          <div className="db_connection_wrapper">
-            <div>Name</div>
-            <input
-              type="text"
-              value={dbName ? dbData[dbName].source_name : dbName}
-              disabled
-            />
+        {checkConnection ? (
+          <div className="check__db__connection">
+            <div className="db_connection_wrapper">
+              <div>Name</div>
+              <input
+                type="text"
+                value={dbName ? dbData[dbName].source_name : dbName}
+                disabled
+              />
+            </div>
+            <div className="db_connection_wrapper">
+              <div>Password</div>
+              <input
+                type="password"
+                placeholder="enter password"
+                value={dbPassword}
+                onChange={(e) => setDbPassword(e.target.value)}
+              />
+            </div>
+            <div className="wrapper__btn">
+              <button
+                className="cancel__btn"
+                onClick={() => setcheckConnection(!checkConnection)}
+              >
+                Cancel
+              </button>
+              <button className="submit__btn" onClick={checkDbConnection}>
+                Submit
+              </button>
+            </div>
           </div>
-          <div className="db_connection_wrapper">
-            <div>Password</div>
-            <input
-              type="password"
-              placeholder="enter password"
-              value={dbPassword}
-              onChange={(e) => setDbPassword(e.target.value)}
-            />
-          </div>
-          <div className="wrapper__btn">
-            <button
-              className="cancel__btn"
-              onClick={() => setcheckConnection(!checkConnection)}
-            >
-              Cancel
-            </button>
-            <button className="submit__btn" onClick={checkDbConnection}>
-              Submit
-            </button>
-          </div>
-        </div>
-      ) : null}
-      {dbCollection.map((item, index) => {
-        return (
-          <div className="db_table" key={index}>
-            <button className="db_table_button">{item.name}</button>
-            <button
-              className="db_table_button_right"
-              onClick={() => dbSelect(item.name)}
-            >
-              check Connection
-            </button>
-            {/* <button className="db_table_button_right">Select Source</button> */}
-          </div>
-        );
-      })}
+        ) : null}
+        {dbCollection.map((item, index) => {
+          return (
+            <div className="db_table" key={index}>
+              <button className="db_table_button">{item.name}</button>
+
+              <button
+                className="db_table_button_right"
+                style={{ width: "auto" }}
+                onClick={() => deletedbConnection(item.name)}
+              >
+                Delete Source
+              </button>
+              <button
+                className="db_table_button_right "
+                onClick={() => dbSelect(item.name)}
+              >
+                check Connection
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

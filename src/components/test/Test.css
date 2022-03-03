@@ -33,18 +33,18 @@
 .field {
   height: 50px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   padding: 5px;
 }
-.container input {
+.field input {
   border: 1px solid rgb(197, 188, 188);
   border-radius: 4px;
   padding: 8px;
   width: 300px;
-  height: 30px;
+  height: 40px;
   align-items: flex-start;
   background-color: #263e58;
   color: #fff;
@@ -81,9 +81,48 @@
   color: #fff;
   text-transform: capitalize;
 }
+.buttonArea {
+  /* height: 50px; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+.buttonArea button {
+  background: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 40px;
+  font-size: 1.2rem;
+  /* background-color: #ee1919; */
+  background-color: #f4b400;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 65%;
+  color: #fff;
+  text-transform: uppercase;
+  transition: 0.2s;
+}
+
+.buttonArea button:hover {
+  box-shadow: 0 0 5px rgb(218, 207, 207);
+  transform: scale(1.03);
+}
+.buttonArea span {
+  text-align: start;
+  align-items: flex-start;
+  width: 140px;
+  font-size: 13px;
+  color: #fff;
+  text-transform: capitalize;
+}
+
 .success__message {
-  height: 250px;
-  top: 25%;
+  height: 220px;
+  top: 22%;
   left: 40%;
   width: 20%;
   position: absolute;
@@ -94,7 +133,7 @@
   justify-content: center;
   align-items: center;
   display: flex;
-  z-index: 1;
+  z-index: 99;
 }
 .check__icon {
   position: absolute;
@@ -110,7 +149,7 @@
 .warn__icon {
   position: absolute;
   top: -10%;
-  background-color: #8d0101;
+  background-color: #b65454;
   height: 85px;
   width: 85px;
   border-radius: 50%;
@@ -121,9 +160,9 @@
 
 .header__message {
   color: rgb(14, 12, 12);
-  font-size: 20px;
+  font-size: 12px;
   width: 100%;
-  /* height: 70px; */
+  height: 70px;
   text-align: center;
   align-items: center;
   justify-content: center;
@@ -131,16 +170,17 @@
   flex-direction: column;
 }
 .header__message h1 {
-  font-size: 30px;
+  font-size: 33px;
   color: rgb(93, 189, 38);
   font-weight: 600;
   text-transform: capitalize;
+  margin-bottom: 30px;
 }
 .header__message span {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 400;
   text-transform: capitalize;
-  margin-top: -20px;
+  margin-top: -30px;
 }
 .header__message button {
   background-color: rgb(93, 189, 38);
@@ -154,7 +194,10 @@
   text-transform: uppercase;
   transition: 0.2s;
   padding: 10px;
-  margin-top: 30px;
+  margin-top: 0px;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 20px;
 }
 
 .starBorderOutlined {
@@ -162,14 +205,20 @@
   transform: scale(3);
 }
 .select {
-  height: 55px !important;
-  width: 62%;
+  border-radius: 4px;
+  padding: 0px;
+  width: 300px;
+  height: 40px;
+  border: 1px solid rgb(160, 153, 153);
+  align-items: flex-start;
+  background-color: #263e58;
+  color: rgb(160, 153, 153);
   position: relative;
 }
 
 .select:after {
   content: "▼";
-  padding: 12px 8px;
+  padding: 2px 8px;
   position: absolute;
   right: 10px;
   top: 0;
@@ -186,8 +235,8 @@
   border-radius: 3px;
   padding: 5px 15px;
   background-color: #263e58;
-  color: #fff;
-  border: 1px solid #e3e3e3;
+  color: rgb(160, 153, 153);
+  border: none;
   outline: none;
   font-size: 13px;
   -webkit-appearance: none;
@@ -226,5 +275,13 @@
     font-weight: 400;
     text-transform: capitalize;
     margin-top: -20px;
+  }
+  .select {
+    width: 60%;
+  }
+  .select__field {
+    width: 68% !important;
+    overflow: hidden;
+    flex-wrap: wrap;
   }
 }

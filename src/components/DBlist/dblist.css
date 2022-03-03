@@ -1,14 +1,25 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.wrapper__container__list {
+  background-color: #07213d;
+  width: 100%;
+  min-height: 94.3vh;
+  margin: 0px auto;
+}
 .db_container {
   width: 60%;
   margin: 5px;
   font-family: "Poppins", sans-serif;
   border-radius: 5px;
-  margin: 20px auto;
+  margin: 0px auto;
   padding: 10px;
   border-radius: 10px;
 }
 .dbhead {
-  color: #6a1b9a;
+  color: #f5f3f7;
   padding: 5px;
   font-family: "Poppins", sans-serif;
   font-size: 36px;
@@ -39,7 +50,7 @@
   background-color: #263238;
   color: #f3f3f3;
   font-weight: 400;
-  width: 220px;
+  width: 180px;
   padding: 10px 15px;
   cursor: pointer;
   border: 1px solid #263238;
