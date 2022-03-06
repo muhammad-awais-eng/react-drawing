@@ -1,0 +1,11 @@
+.newtable__row {
+  display: flex !important;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px;
+}
+.target__table {
+  width: 60%;
+  height: 10px;
+  margin-top: -10px;
+}

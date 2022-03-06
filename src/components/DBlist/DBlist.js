@@ -32,6 +32,7 @@ function DBlist() {
           },
         })
         .then((response) => {
+          console.log(response.data);
           if (response.data.status === "successful") {
             console.log("sdas");
             setSuccessMessage(true);
@@ -94,13 +95,10 @@ function DBlist() {
 
     try {
       await axios
-        .delete("/v1/db_connection", {
+        .delete(`/v1/db_connection/${dbName}`, {
           headers: {
             "X-User-ID": 1,
             "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
-          },
-          data: {
-            connection_name: dbName,
           },
         })
         .then((response) => {
@@ -197,7 +195,10 @@ function DBlist() {
               <button
                 className="db_table_button_right"
                 style={{ width: "auto" }}
-                onClick={() => deletedbConnection(item.name)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  deletedbConnection(item.name);
+                }}
               >
                 Delete Source
               </button>

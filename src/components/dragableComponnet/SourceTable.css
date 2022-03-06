@@ -1,9 +1,18 @@
 .container__list {
   width: 99%;
   display: flex !important;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-start;
   flex-direction: row !important;
+  margin: 5px;
+}
+.left__todos {
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  width: 35%;
+  padding: 15px;
+  background-color: #001c3a;
   margin: 5px;
 }
 
@@ -11,7 +20,7 @@
   border-radius: 5px;
   display: flex;
   flex-direction: column;
-  width: 25%;
+  width: 65%;
   padding: 15px;
   background-color: #001c3a;
   margin: 5px;
@@ -42,7 +51,7 @@
   border-radius: 5px;
   padding: 20px;
   margin-top: 15px;
-  background-image: url('https://img.freepik.com/free-photo/crumpled-yellow-paper-background-close-up_60487-2390.jpg?size=626&ext=jpg');
+  background-image: url("https://img.freepik.com/free-photo/crumpled-yellow-paper-background-close-up_60487-2390.jpg?size=626&ext=jpg");
   transition: 0.2s;
 }
 
@@ -91,3 +100,5 @@
     margin-bottom: 10px;
   }
 }
+
+/* ***************targt table csss********* */

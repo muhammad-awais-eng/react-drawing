@@ -6,12 +6,8 @@ import axios from "axios";
 import "./style.css";
 const DragableComponent = () => {
   const [todos, setTodos] = useState([]);
+  const [CompletedTodos, setCompletedTodos] = useState([]);
 
-  //  { id: 1, name: "first table" },
-  //   { id: 2, name: "second table" },
-  //   { id: 3, name: "third table" },
-  //   { id: 4, name: "fourth table" },
-  //   { id: 5, name: "fifth table" },
   useEffect(() => {
     try {
       axios
@@ -40,12 +36,10 @@ const DragableComponent = () => {
     }
   }, []);
 
-  const [CompletedTodos, setCompletedTodos] = useState([]);
-
   const onDragEnd = (result) => {
     const { destination, source } = result;
 
-    console.log(result);
+    // console.log(result);
 
     if (!destination) {
       return;
@@ -73,14 +67,14 @@ const DragableComponent = () => {
     //Destination Logic
     if (destination.droppableId === "TodosList") {
       active.splice(destination.index - 1, 0, add);
-      console.log("des if");
+      // console.log("des if");
     } else {
       complete.splice(destination.index, 0, add);
 
-      console.log("dest else");
+      // console.log("dest else");
     }
 
-    console.log(active, complete);
+    // console.log(active, complete);
     setCompletedTodos(complete);
     setTodos(active);
   };

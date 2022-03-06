@@ -38,14 +38,27 @@ const TestConncection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dbCollection, setDbCollection] = useState(["mysql", "redshift"]);
 
+  const handleReset = () => {
+    setConnectionData({
+      source_type: "",
+      source_name: "",
+      ip_address: "",
+      db_port: "",
+      db_user: "",
+      db_password: "",
+      db_schema: "",
+      db_name: "",
+    });
+    setConnectionName("");
+  };
+
   const handleConnectionSubmit = (e) => {
     e.preventDefault();
-
     const body = connectionData;
     console.log(body);
     try {
       axios
-        .post(`/v1/db_connection_creator/${connectionName}`, body, {
+        .post(`/v1/db_connection/${connectionName}`, body, {
           headers: {
             "X-User-ID": 1,
             "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
@@ -78,8 +91,15 @@ const TestConncection = () => {
           },
         })
         .then((response) => {
-          setSuccessMessage(true);
-          setIsModalOpen(true);
+          if (response.data.status === "successful") {
+            console.log("sdas");
+            setSuccessMessage(true);
+            setIsModalOpen(true);
+          } else {
+            setSuccessMessage(false);
+            setIsModalOpen(true);
+          }
+
           console.log(response.data);
         })
         .catch((error) => {
@@ -116,11 +136,6 @@ const TestConncection = () => {
           </div>
         ) : (
           <div className="success__message">
-            {/* <div className="warn__icon">
-              <div>
-                <ClearIcon className="starBorderOutlined" />
-              </div>
-            </div> */}
             <div className="header__message">
               <h1 style={{ color: "#b65454" }}>Failed </h1>
               <span>please check your crediential </span>
@@ -137,7 +152,7 @@ const TestConncection = () => {
         )
       ) : null}
 
-      <form className="form__container" onSubmit={handleConnectionSubmit}>
+      <div className="form__container">
         <h1>Test Conncection</h1>
         <div className="field">
           <span>connection name</span>
@@ -268,13 +283,18 @@ const TestConncection = () => {
 
         <div className="buttonArea">
           <span>
-            <button style={{ backgroundColor: "#ee1919", padding: "8px" }}>
+            <button
+              onClick={handleReset}
+              style={{ backgroundColor: "#ee1919", padding: "8px" }}
+            >
               Reset
             </button>
           </span>
-          <button type="submit">Submit</button>
+          <button type="submit" onClick={handleConnectionSubmit}>
+            Submit
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

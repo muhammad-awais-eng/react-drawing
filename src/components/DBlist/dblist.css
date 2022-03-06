@@ -74,9 +74,9 @@
 
 .check__db__connection {
   height: 30vh;
-  width: 30%;
+  width: 35%;
   position: absolute;
-  top: 28%;
+  top: 38%;
   left: 38%;
   border-radius: 10px;
   background-color: #90caf9;
@@ -97,11 +97,12 @@
 .db_connection_wrapper div {
   width: 20%;
   color: #333;
+  margin-right: 20px;
 }
 .db_connection_wrapper input {
   width: 60%;
   padding: 10px;
-  height: 20px;
+  height: 30px;
   border: none;
   font-weight: 400;
   color: #333;

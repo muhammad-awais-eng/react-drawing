@@ -1,0 +1,231 @@
+:root {
+  --primary-color: #24977b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+.container-reg {
+  text-align: left;
+}
+.width-50 {
+  width: 20% !important;
+}
+
+.ml-auto {
+  margin-left: auto !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Progressbar */
+.progressbar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  counter-reset: step;
+  margin: 2rem 0 4rem;
+}
+
+.progressbar::before,
+.progress {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  background-color: #dcdcdc;
+}
+
+.progress {
+  background-color: var(--primary-color) !important;
+  height: 4px !important;
+  width: 40%;
+  transition: 0.3s;
+}
+
+.progress-step {
+  width: 2.1875rem;
+  height: 2.1875rem;
+  background-color: #dcdcdc;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.progress-step::before {
+  counter-increment: step;
+  content: counter(step);
+}
+
+.progress-step::after {
+  content: attr(data-title);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.progress-step-active {
+  background-color: var(--primary-color);
+  color: #f3f3f3;
+}
+
+/* Form */
+.form {
+  font-family: "Open Sans", sans-serif;
+  width: 65%;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 0.35rem;
+  padding: 2rem;
+  font-size: 14px !important;
+}
+
+.form-step {
+  display: none;
+  transform-origin: top;
+  animation: animate 0.5s;
+}
+
+.form-step-active {
+  display: block;
+}
+
+/* Button */
+.btns-group {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+.btns-group > a {
+  width: 100px;
+}
+
+.foobtn {
+  padding: 0.55rem !important;
+  border: none !important;
+  display: block !important;
+  text-decoration: none !important;
+  background-color: var(--primary-color) !important;
+  color: #f3f3f3 !important;
+  text-align: center !important;
+  border-radius: 0.25rem !important;
+  cursor: pointer !important;
+  transition: 0.3s !important;
+  margin-top: 25px !important;
+  overflow: hidden;
+}
+.foobtn:hover {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--primary-color);
+}
+
+/* Dbs selection */
+.dbs__Selections {
+  display: flex;
+  justify-content: space-around;
+}
+.source_db_select {
+  text-align: left;
+  width: 45%;
+  padding: 20px;
+  margin: 2px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+.target_db_select {
+  text-align: left;
+  width: 45%;
+  padding: 20px;
+  padding-left: 5%;
+  margin: 2px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+.db_schema__selection {
+  display: flex;
+  justify-content: space-around;
+}
+.target__schema__container,
+.source__schema__container {
+  width: 49%;
+  border: 1px solid #ccc;
+}
+
+.target__schema__container h1,
+.source__schema__container h1 {
+  text-align: center;
+  padding: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+.target__schema__wrapper,
+.source__schema__wrapper {
+  padding: 30px 20px;
+  border-radius: 5px;
+}
+
+/* ***delta confguration*** */
+
+.delta__configuration {
+}
+.delta__field {
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+.delta__field input {
+  border: 1px solid rgb(197, 188, 188);
+  border-radius: 4px;
+  padding: 8px;
+  width: 300px;
+  height: 40px;
+  align-items: flex-start;
+  background-color: #263e58;
+  color: #fff;
+}
+.delta__field input::placeholder {
+  color: rgb(173, 169, 169);
+}
+.delta__field button {
+  background: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 40px;
+  font-size: 1.2rem;
+  /* background-color: #ee1919; */
+  background-color: #f4b400;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 65%;
+  color: #fff;
+  text-transform: uppercase;
+  transition: 0.2s;
+}
+
+.delta__field button:hover {
+  box-shadow: 0 0 5px rgb(218, 207, 207);
+  transform: scale(1.03);
+}
+.delta__field span {
+  text-align: start;
+  align-items: flex-start;
+  width: 140px;
+  font-size: 13px;
+  color: rgb(61, 41, 41);
+  text-transform: capitalize;
+}

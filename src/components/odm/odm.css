@@ -13,30 +13,19 @@
   border: 1px solid rgb(197, 187, 187);
   background-color: rgb(247, 239, 239);
 }
+#demo-customized-select-native {
+  width: 100%;
+  outline: 1px solid rgb(182, 174, 174);
+  background-color: transparent;
+}
 .source__column {
   background-color: "red";
   display: flex;
-  border-top: 1px solid rgb(223, 205, 205);
+  /* border-top: 1px solid rgb(223, 205, 205); */
   min-height: 35px;
   align-items: center;
 }
-.source_db_select {
-  text-align: left;
-  padding: 20px;
-  margin: 2px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: rgb(221, 218, 201);
-}
-.target_db_select {
-  text-align: left;
-  padding: 20px;
-  padding-left: 5%;
-  margin: 2px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background-color: rgb(221, 218, 201);
-}
+
 #demo-multiple-name-label {
   color: #000;
   font-size: 18px;
