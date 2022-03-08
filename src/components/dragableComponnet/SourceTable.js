@@ -138,6 +138,7 @@ const SourceTable = ({
                   index={index}
                   todos={completedTodos}
                   todo={todo}
+                  id={todo.id}
                   key={todo.id}
                   setTodos={setCompletedTodos}
                 />

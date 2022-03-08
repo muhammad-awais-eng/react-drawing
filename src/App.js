@@ -6,6 +6,8 @@ import DragableLines from "./components/dragableLinesConnecter/DragableLines";
 import TestConncection from "./components/test/TestConncection";
 import DBlist from "./components/DBlist/DBlist";
 import Odm from "./components/odm/Odm";
+import OdmForm from "./components/odm/OdmForm";
+import TreeFile from "./components/treeFile/TreeFile";
 
 function App() {
   return (
@@ -13,8 +15,8 @@ function App() {
       <Navbar />
       <Routes>
         <Route exact path="/" element={<TestConncection />}></Route>
-        <Route path="/list" element={<DragableComponent />}></Route>
-        <Route path="/mapping" element={<Odm />}></Route>
+        <Route path="/list" element={<TreeFile />}></Route>
+        <Route path="/mapping" element={<OdmForm />}></Route>
         <Route path="/dblist" element={<DBlist />}></Route>
       </Routes>
     </BrowserRouter>

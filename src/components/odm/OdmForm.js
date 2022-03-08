@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "./OdmForm.css";
 import axios from "axios";
 import "./odm.css";
-import SourceTable from "../dragableComponnet/SourceTable";
+import OdmDrager from "./odmdragger/OdmDrager";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import StorageIcon from "@mui/icons-material/Storage";
@@ -22,7 +22,7 @@ import FormControl from "@mui/material/FormControl";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormLabel from "@mui/material/FormLabel";
-
+import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { styled } from "@mui/material/styles";
@@ -31,6 +31,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import NativeSelect from "@mui/material/NativeSelect";
 import InputBase from "@mui/material/InputBase";
+import InputAdornment from "@mui/material/InputAdornment";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -85,23 +86,57 @@ function OdmForm() {
   const [targetDbList, setTargetDbList] = useState([]);
   const [dbCollection, setDbCollection] = useState([]);
 
+  const [sourceSchemaList, setSourceSchemaList] = useState([]);
+  const [targetSchemaList, setTargetSchemaList] = useState([]);
+
   const [dbData, setDbData] = useState([]);
-  const [checkConnection, setcheckConnection] = useState(false);
+  const [checkSourceConnection, setCheckSourceConnection] = useState(false);
   const [checkTarrgetConnection, setCheckTarrgetConnection] = useState(false);
-  const [sourceDBName, setSourceDBName] = React.useState("");
+
+  const [sourceConnectionName, setSourceConnectionName] = React.useState("");
   const [sourceDBpassword, setSourceDBPassword] = React.useState("");
+
+  const [sourceDBName, setSourceDBName] = React.useState("");
   const [targetDBName, setTargetDBName] = React.useState("");
+
+  const [targetConnectionName, setTargetConnectionName] = React.useState("");
   const [targetDBpassword, setTargetDBpassword] = React.useState("");
-  const [a, seta] = React.useState("");
+
   const [sourceSchema, setSourceSchema] = React.useState("");
   const [targetSchema, setTargetSchema] = React.useState("");
+
   const [sourceTable, setSourceTable] = React.useState("");
   const [targetTable, setTargetTable] = React.useState("");
+
   const [sourceColumn, setSourceColumn] = React.useState([]);
   const [targetColumn, setTargetColumn] = React.useState([]);
 
+  const [sourceColumnList, setSourceColumnList] = useState([]);
+
   const [sourceTableNames, setSourceTableName] = React.useState([]);
   const [targetTableNames, setTargetTableName] = React.useState([]);
+
+  const [datatypes, setdataTypes] = React.useState([]);
+
+  const [isdrop, setIsDrop] = React.useState(false);
+  const [isTruncate, setIsTruncate] = React.useState(false);
+  const [isUpsert, setIsUpsert] = React.useState(false);
+  const [upsertKey, setUpsertKey] = React.useState("");
+  const [primaryKey, setPrimaryKey] = React.useState("");
+
+  const [deltaFlow, setDeltaFlow] = React.useState("");
+  const [delataColumn, setdelataColumn] = React.useState("");
+  const [deltaType, setDeltaType] = React.useState("");
+  const [fromValue, setFromValue] = React.useState("");
+  const [fromOperator, setFromOperator] = React.useState("");
+  const [toValue, setToValues] = React.useState("");
+  const [toOperator, setToOperator] = React.useState("");
+  const [lastExtractedValues, setLastExtractedValues] = React.useState("");
+  const [executionStartTimestamp, setExecutionStartTimestamp] =
+    React.useState("");
+  const [executionEndTimestamp, setExecutionEndTimestamp] = React.useState("");
+
+  const [taskName, setTaskName] = React.useState("");
 
   const handleSourceChange = (event) => {
     event.preventDefault();
@@ -109,22 +144,48 @@ function OdmForm() {
       target: { value },
     } = event;
     console.log(event.target.value);
-    setSourceDBName(value);
+    setSourceConnectionName(value);
 
-    setcheckConnection(!checkConnection);
+    setCheckSourceConnection(!checkSourceConnection);
   };
   const handleTargetChange = (event) => {
     const {
       target: { value },
     } = event;
-    setTargetDBName(value);
+    console.log(event.target.value);
+    setTargetConnectionName(value);
+    setCheckTarrgetConnection(!checkTarrgetConnection);
   };
 
-  useEffect(() => {
-    if (sourceDBName.length > 0) {
-      SourceSchemaList(sourceDBName, sourceDBpassword);
+  const getDataTypes = async (dbName) => {
+    try {
+      axios
+        .get("v1/list_db_datatypes", {
+          params: {
+            database_name: dbName,
+          },
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log(response.data.entities_datatypes);
+          setdataTypes(response.data.entities_datatypes);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (e) {
+      console.log(e);
     }
-  }, []);
+  };
+
+  // useEffect(() => {
+  //   if (sourceConnectionName.length > 0) {
+  //     SourceSchemaList(sourceConnectionName, sourceDBpassword);
+  //   }
+  // }, []);
 
   useEffect(() => {
     try {
@@ -136,6 +197,7 @@ function OdmForm() {
           },
         })
         .then((response) => {
+          console.log(response.data.result_list);
           setDbData(response.data.result_list);
           const data = Object.keys(response.data.result_list);
           data.map((item, index) => {
@@ -151,51 +213,12 @@ function OdmForm() {
     }
   }, []);
 
-  useEffect(() => {
-    try {
-      axios
-        .get("/v1/list_db_schema", {
-          params: {
-            connection_name: "final_test",
-            inserted_db_password: "admin123",
-          },
-          headers: {
-            "X-User-ID": 1,
-            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
-          },
-        })
-        .then((response) => {
-          setSourcerDbList([]);
-          setTargetDbList([]);
-          const data = response.data.schema_entities;
-          data.map((item) => {
-            // setSourcerDbList((prevState) => [
-            //   ...prevState,
-            //   { dbName: item, sourceEntitiesList: [] },
-            // ]);
-
-            setTargetDbList((prevState) => [
-              ...prevState,
-              { dbName: item, targetEntitiesList: [] },
-            ]);
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          alert("please check your credientials");
-          //   setSuccessMessage(true);
-        });
-    } catch (e) {
-      console.log(e);
-    }
-  }, []);
-
   const checkSourceDbConnection = async () => {
     try {
       await axios
         .get("/v1/db_connection_check", {
           params: {
-            connection_name: sourceDBName,
+            connection_name: sourceConnectionName,
             inserted_db_password: sourceDBpassword,
           },
           headers: {
@@ -205,8 +228,8 @@ function OdmForm() {
         })
         .then((response) => {
           console.log(response.data);
-          SourceSchemaList(sourceDBName, sourceDBpassword);
-          setcheckConnection(!checkConnection);
+          SourceSchemaList(sourceConnectionName, sourceDBpassword);
+          setCheckSourceConnection(!checkSourceConnection);
         })
         .catch((error) => {
           console.log(error);
@@ -218,12 +241,14 @@ function OdmForm() {
     }
   };
 
-  const SourceSchemaList = async (sourceDBName, sourceDBpassword) => {
+  const SourceSchemaList = async (sourceConnectionName, sourceDBpassword) => {
+    const dbName = dbData[sourceConnectionName].source_name;
+    setSourceDBName(dbName);
     try {
       axios
         .get("/v1/list_db_schema", {
           params: {
-            connection_name: sourceDBName,
+            connection_name: sourceConnectionName,
             inserted_db_password: sourceDBpassword,
           },
           headers: {
@@ -232,10 +257,10 @@ function OdmForm() {
           },
         })
         .then((response) => {
-          setSourcerDbList([]);
+          setSourceSchemaList([]);
           const data = response.data.schema_entities;
           data.map((item) => {
-            setSourcerDbList((prevState) => [
+            setSourceSchemaList((prevState) => [
               ...prevState,
               { dbName: item, sourceEntitiesList: [] },
             ]);
@@ -255,15 +280,80 @@ function OdmForm() {
     }
   };
 
+  const checkTargetDbConnection = async () => {
+    try {
+      await axios
+        .get("/v1/db_connection_check", {
+          params: {
+            connection_name: targetConnectionName,
+            inserted_db_password: targetDBpassword,
+          },
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          TargetSchemaList(targetConnectionName, targetDBpassword);
+          setCheckTarrgetConnection(!checkTargetDbConnection);
+        })
+        .catch((error) => {
+          console.log(error);
+
+          alert("please check your credientials");
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const TargetSchemaList = async (targetDbName, targetDBpassword) => {
+    const dbName = dbData[targetDbName].source_name;
+    setTargetDBName(dbName);
+    getDataTypes(dbName);
+
+    try {
+      axios
+        .get("/v1/list_db_schema", {
+          params: {
+            connection_name: targetDbName,
+            inserted_db_password: targetDBpassword,
+          },
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          setTargetSchemaList([]);
+          const data = response.data.schema_entities;
+          data.map((item) => {
+            setTargetSchemaList((prevState) => [
+              ...prevState,
+              { dbName: item, sourceEntitiesList: [] },
+            ]);
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("please check your credientials");
+          //   setSuccessMessage(true);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const listSourceEntites = async (dbName) => {
-    console.log(dbName);
     try {
       axios
         .get("/v1/list_db_entities", {
           params: {
-            connection_name: sourceDBName,
+            connection_name: sourceConnectionName,
             schema_name: dbName,
-            inserted_db_password: "admin123",
+            inserted_db_password: sourceDBpassword,
           },
           headers: {
             "X-User-ID": 1,
@@ -301,13 +391,14 @@ function OdmForm() {
   };
 
   const SourceColumnList = async (tableName) => {
-    console.log(tableName, sourceDBName);
+    console.log(tableName, sourceConnectionName);
     try {
       axios
         .get("/v1/list_entity_column", {
           params: {
-            connection_name: sourceDBName,
-            inserted_db_password: "admin123",
+            connection_name: sourceConnectionName,
+            inserted_db_password: sourceDBpassword,
+            schema_name: sourceSchema,
             entity_name: tableName,
           },
           headers: {
@@ -321,7 +412,28 @@ function OdmForm() {
 
           data.map((item, index) => {
             console.log(item);
-            setSourceColumn((data) => [...data, { id: index, name: item }]);
+            setSourceColumn((data) => [
+              ...data,
+              {
+                id: index,
+                name: item,
+                datatypes: "",
+                rulesEngine: {
+                  rule: "",
+                },
+              },
+            ]);
+            setSourceColumnList((data) => [
+              ...data,
+              {
+                id: index,
+                name: item,
+                datatypes: "",
+                rulesEngine: {
+                  rule: "",
+                },
+              },
+            ]);
           });
 
           //   setSourceColumn(response.data.entities_metadata);
@@ -342,9 +454,9 @@ function OdmForm() {
       axios
         .get("/v1/list_db_entities", {
           params: {
-            connection_name: targetDBName,
+            connection_name: targetConnectionName,
             schema_name: dbName,
-            inserted_db_password: "admin123",
+            inserted_db_password: targetDBpassword,
           },
           headers: {
             "X-User-ID": 1,
@@ -352,7 +464,6 @@ function OdmForm() {
           },
         })
         .then((response) => {
-          console.log(response.data.schema_entities);
           const data = response.data.schema_entities;
           let temp_state = [...targetDbList];
           let temp_element = temp_state.map((el) =>
@@ -368,7 +479,7 @@ function OdmForm() {
                 }
               : el
           );
-          console.log(temp_element, "dsds");
+
           setTargetDbList(temp_element);
           setTargetTableName(response.data.schema_entities);
         })
@@ -386,8 +497,9 @@ function OdmForm() {
       axios
         .get("/v1/list_entity_column", {
           params: {
-            connection_name: "final_test",
-            inserted_db_password: "admin123",
+            connection_name: targetConnectionName,
+            inserted_db_password: targetDBpassword,
+            schema_name: targetSchema,
             entity_name: tableName,
           },
           headers: {
@@ -472,14 +584,85 @@ function OdmForm() {
     setSourceColumn(active);
   };
 
+  const handleJob = (e) => {
+    e.preventDefault();
+
+    const body = {
+      task_mappings: {
+        process_groups: {},
+        process_individuals: [
+          {
+            task_name: taskName,
+            source_database_name: sourceDBName,
+            target_database_name: targetDBName,
+            source_schema_name: sourceSchema,
+            target_schema_name: targetSchema,
+            entity_name: sourceTable,
+            drop_p: isdrop ? 1 : 0,
+            truncate_p: isTruncate ? 1 : 0,
+            upsert_p: isUpsert ? 1 : 0,
+            upsert_key: upsertKey,
+            primary_key: primaryKey,
+            delta_configurations: {
+              delta_flow: deltaFlow,
+              delta_column: delataColumn,
+              delta_type: deltaType,
+              from_value: fromValue,
+              from_operator: fromOperator,
+              to_value: toValue,
+              to_operator: toOperator,
+              last_extracted_values: lastExtractedValues,
+              execution_start_timestamp: executionStartTimestamp,
+              execution_end_timestamp: executionEndTimestamp,
+            },
+            column_mapping: targetColumn?.map((item, idx) => {
+              return {
+                column_name: item.name,
+                data_type: item.datatypes,
+                rules_engine: item.rulesEngine,
+              };
+            }),
+
+            process_configurations: {
+              source_connection: sourceConnectionName,
+              source_encoded_password: sourceDBpassword,
+              target_connection: targetConnectionName,
+              target_encoded_password: targetDBpassword,
+              active_status: 1,
+            },
+          },
+        ],
+      },
+    };
+    try {
+      axios
+        .post("/v1/tasks_mapper_engine", body, {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log("success post", response.data);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    } catch (e) {
+      console.log(e);
+    }
+
+    console.log(body);
+  };
+
   return (
     <div>
       {/* **********************************   <-- check source connection -->  **************************************** */}
-      {checkConnection ? (
+      {checkSourceConnection ? (
         <div className="check__db__connection">
           <div className="db_connection_wrapper">
             <div>Name</div>
-            <input type="text" value={sourceDBName} disabled />
+            <input type="text" value={sourceConnectionName} disabled />
           </div>
           <div className="db_connection_wrapper">
             <div>Password</div>
@@ -493,7 +676,7 @@ function OdmForm() {
           <div className="wrapper__btn">
             <button
               className="cancel__btn"
-              onClick={() => setcheckConnection(!checkConnection)}
+              onClick={() => setCheckSourceConnection(!checkSourceConnection)}
             >
               Cancel
             </button>
@@ -509,7 +692,7 @@ function OdmForm() {
         <div className="check__db__connection">
           <div className="db_connection_wrapper">
             <div>Name</div>
-            <input type="text" value={targetDBName} disabled />
+            <input type="text" value={targetConnectionName} disabled />
           </div>
           <div className="db_connection_wrapper">
             <div>Password</div>
@@ -529,14 +712,14 @@ function OdmForm() {
             >
               Cancel
             </button>
-            <button className="submit__btn" onClick={checkSourceDbConnection}>
+            <button className="submit__btn" onClick={checkTargetDbConnection}>
               Submit
             </button>
           </div>
         </div>
       ) : null}
 
-      <form className="form">
+      <form className="form" onSubmit={handleJob}>
         <h1 className="text-center">ODM Process</h1>
         {/*******************************    <-- Progress bar --> ****************************************************************************/}
         <div className="progressbar">
@@ -578,7 +761,7 @@ function OdmForm() {
               "progress-step " +
               (formStepsNu >= 4 ? "progress-step-active" : "")
             }
-            data-title="advanced"
+            data-title="Delta Configuration"
           ></div>
           <div
             className={
@@ -601,7 +784,7 @@ function OdmForm() {
                 {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
                 <NativeSelect
                   id="demo-customized-select-native"
-                  value={sourceDBName}
+                  value={sourceConnectionName}
                   onChange={handleSourceChange}
                   input={<BootstrapInput />}
                 >
@@ -621,7 +804,7 @@ function OdmForm() {
                 {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
                 <NativeSelect
                   id="demo-customized-select-native"
-                  value={targetDBName}
+                  value={targetConnectionName}
                   onChange={handleTargetChange}
                   input={<BootstrapInput />}
                 >
@@ -639,7 +822,8 @@ function OdmForm() {
           </div>
 
           <div className="">
-            {sourceDBName.length > 0 && targetDBName.length > 0 ? (
+            {sourceConnectionName.length > 0 &&
+            targetConnectionName.length > 0 ? (
               <button
                 className="foobtn btn-next width-50 ml-auto"
                 onClick={nextbtn}
@@ -658,7 +842,7 @@ function OdmForm() {
         >
           <div className="db_schema__selection">
             <div className="source__schema__container">
-              <h1>{sourceDBName}</h1>
+              <h1>{sourceConnectionName}</h1>
               <div className="source__schema__wrapper">
                 <FormControl>
                   <RadioGroup
@@ -671,7 +855,7 @@ function OdmForm() {
                       listSourceEntites(e.target.value);
                     }}
                   >
-                    {sourcerDbList.map((db) => (
+                    {sourceSchemaList.map((db) => (
                       <div>
                         <div className="source__column">
                           <div
@@ -686,7 +870,7 @@ function OdmForm() {
                           </div>
                         </div>
 
-                        <div>
+                        {/* <div>
                           {db.sourceEntitiesList?.map((entity) => {
                             return (
                               <div>
@@ -737,7 +921,7 @@ function OdmForm() {
                               </div>
                             );
                           })}
-                        </div>
+                        </div> */}
                       </div>
                     ))}
                   </RadioGroup>
@@ -746,7 +930,7 @@ function OdmForm() {
             </div>
 
             <div className="target__schema__container">
-              <h1>{targetDBName}</h1>
+              <h1>{targetConnectionName}</h1>
               <div className="target__schema__wrapper">
                 <FormControl>
                   <RadioGroup
@@ -759,7 +943,7 @@ function OdmForm() {
                       listTargetEntites(e.target.value);
                     }}
                   >
-                    {targetDbList.map((db) => (
+                    {targetSchemaList.map((db) => (
                       <div>
                         <div className="source__column">
                           <div
@@ -952,7 +1136,7 @@ function OdmForm() {
         >
           <div className="db_schema__selection">
             <div className="source__schema__container">
-              <h1>{sourceDBName}</h1>
+              <h1>{sourceConnectionName}</h1>
               <div className="source__schema__wrapper">
                 <FormControl>
                   <RadioGroup
@@ -1040,7 +1224,7 @@ function OdmForm() {
             </div>
 
             <div className="target__schema__container">
-              <h1>{targetDBName}</h1>
+              <h1>{targetConnectionName}</h1>
               <div className="target__schema__wrapper">
                 <FormControl>
                   <RadioGroup
@@ -1094,13 +1278,25 @@ function OdmForm() {
             <DragDropContext onDragEnd={onDragEnd}>
               <div>
                 <div>
-                  <SourceTable
+                  <OdmDrager
                     sourcetable={sourceTable}
                     targetTable={targetTable}
                     todos={sourceColumn}
                     setTodos={setSourceColumn}
                     completedTodos={targetColumn}
                     setCompletedTodos={setTargetColumn}
+                    dropValue={isdrop}
+                    setDropValue={setIsDrop}
+                    truncateValue={isTruncate}
+                    setTruncateValue={setIsTruncate}
+                    upsertValue={isUpsert}
+                    setupsertValue={setIsUpsert}
+                    upsertKey={upsertKey}
+                    setUpsertKey={setUpsertKey}
+                    primaryKey={primaryKey}
+                    setPrimaryKey={setPrimaryKey}
+                    dataTypes={datatypes}
+                    sourceColumnList={sourceColumnList}
                   />
                 </div>
               </div>
@@ -1116,7 +1312,7 @@ function OdmForm() {
             </a>
           </div>
         </div>
-        {/* **********************************************************  <-- delta configuration -->  ********************************************************************/}
+        {/* **************************  <-- delta configuration -->  ********************************************************************/}
 
         <div
           className={
@@ -1128,61 +1324,202 @@ function OdmForm() {
               <h1>Delta Configuration </h1>
               <div className="delta__field">
                 <span>Delta flow</span>
-                <input type="text" placeholder="delta flow" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <NativeSelect
+                      id="demo-customized-select-native"
+                      value={deltaFlow}
+                      onChange={(e) => setDeltaFlow(e.target.value)}
+                      input={<BootstrapInput />}
+                    >
+                      <option aria-label="None" value="">
+                        choose type
+                      </option>
+                      <option aria-label="None" value="one_time">
+                        one Time
+                      </option>
+                      <option aria-label="None" value="incremental">
+                        Incremental
+                      </option>
+                    </NativeSelect>
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
                 <span>Delta column</span>
-                <input type="text" placeholder="Delta column" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
+                    <NativeSelect
+                      id="demo-customized-select-native"
+                      value={delataColumn}
+                      onChange={(e) => setdelataColumn(e.target.value)}
+                      input={<BootstrapInput />}
+                    >
+                      <option aria-label="None" value="">
+                        choose option
+                      </option>
+                      {sourceColumnList.map((column) => {
+                        return (
+                          <option aria-label="None" value={column.name}>
+                            {column.name}
+                          </option>
+                        );
+                      })}
+                    </NativeSelect>
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
                 <span>Delta Type</span>
-                <input type="text" placeholder="Delta Type" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <NativeSelect
+                      id="demo-customized-select-native"
+                      value={deltaType}
+                      onChange={(e) => setDeltaType(e.target.value)}
+                      input={<BootstrapInput />}
+                    >
+                      <option aria-label="None" value="">
+                        choose datatypes
+                      </option>
+                      {datatypes.map((column) => {
+                        return (
+                          <option aria-label="None" value={column}>
+                            {column}
+                          </option>
+                        );
+                      })}
+                    </NativeSelect>
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
                 <span>From Value </span>
-                <input type="text" placeholder="From Value" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <OutlinedInput
+                      value={fromValue}
+                      onChange={(e) => setFromValue(e.target.value)}
+                      style={{ width: "100%", backgroundColor: "transparent" }}
+                      placeholder="Please enter text"
+                    />
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
                 <span>from operator</span>
-                <input type="text" placeholder="from operator" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
+                    <NativeSelect
+                      id="demo-customized-select-native"
+                      value={fromOperator}
+                      onChange={(e) => setFromOperator(e.target.value)}
+                      input={<BootstrapInput />}
+                    >
+                      <option aria-label="None" value="">
+                        choose operater
+                      </option>
+                      <option aria-label="None" value=">">
+                        greater than
+                      </option>
+                      <option aria-label="None" value=">=">
+                        greater than equal
+                      </option>
+                      <option aria-label="None" value="<">
+                        less than
+                      </option>
+                      <option aria-label="None" value="<=">
+                        less than equal
+                      </option>
+                    </NativeSelect>
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
-                <span>To Value</span>
-                <input type="text" placeholder="To Value" />
+                <span>To Value </span>
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <OutlinedInput
+                      value={toValue}
+                      onChange={(e) => setToValues(e.target.value)}
+                      style={{ width: "100%", backgroundColor: "transparent" }}
+                      placeholder="Please enter text"
+                    />
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
-                <span>To Operator</span>
-                <input type="text" placeholder="To Operator" />
+                <span>To operator</span>
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
+                    <NativeSelect
+                      id="demo-customized-select-native"
+                      value={toOperator}
+                      onChange={(e) => setToOperator(e.target.value)}
+                      input={<BootstrapInput />}
+                    >
+                      <option aria-label="None" value="">
+                        choose operater
+                      </option>
+                      <option aria-label="None" value=">">
+                        greater than
+                      </option>
+                      <option aria-label="None" value=">=">
+                        greater than equal
+                      </option>
+                      <option aria-label="None" value="<">
+                        less than
+                      </option>
+                      <option aria-label="None" value="<=">
+                        less than equal
+                      </option>
+                    </NativeSelect>
+                  </FormControl>
+                </div>
               </div>
               <div className="delta__field">
-                <span>Last Extracted</span>
-                <input type="text" placeholder="Last Extracted" />
-              </div>
-              <div className="delta__field">
-                <span>Executation Start Time</span>
-                <input type="text" placeholder="Executation Start Time" />
-              </div>
+                <span>Last Executed Values </span>
 
-              <div className="delta__field">
-                <span>Execuation End Time</span>
-                <input type="text" placeholder="Execuation End Time" />
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <OutlinedInput
+                      value={lastExtractedValues}
+                      onChange={(e) => setLastExtractedValues(e.target.value)}
+                      placeholder="Please enter text"
+                    />
+                  </FormControl>
+                </div>
               </div>
-
-              <div className="buttonArea">
-                <span>
-                  <button
-                    // onClick={handleReset}
-                    style={{ backgroundColor: "#ee1919", padding: "8px" }}
-                  >
-                    Reset
-                  </button>
-                </span>
-                <button
-                  type="submit"
-                  // onClick={handleConnectionSubmit}
-                >
-                  Submit
-                </button>
+              <div className="delta__field">
+                <span>Execution Start </span>
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <OutlinedInput
+                      value={executionStartTimestamp}
+                      onChange={(e) =>
+                        setExecutionStartTimestamp(e.target.value)
+                      }
+                      style={{ width: "100%", backgroundColor: "transparent" }}
+                      placeholder="Please enter text"
+                    />
+                  </FormControl>
+                </div>
+              </div>
+              <div className="delta__field">
+                <span>Execution End </span>
+                <div className="target__table">
+                  <FormControl sx={{ width: "100%" }} variant="standard">
+                    <OutlinedInput
+                      value={executionEndTimestamp}
+                      onChange={(e) => setExecutionEndTimestamp(e.target.value)}
+                      style={{ width: "100%", backgroundColor: "transparent" }}
+                      placeholder="Please enter text"
+                    />
+                  </FormControl>
+                </div>
               </div>
             </div>
           </div>
@@ -1196,14 +1533,56 @@ function OdmForm() {
             </a>
           </div>
         </div>
-        {/* **********************************************************  <-- Menu Item Presentaion -->  ******************************************************************/}
+        {/* *************************  <-- connection Name -->  ******************************************************************/}
 
         <div
           className={
             "form-step " + (formStepsNu === 5 ? "form-step-active" : "")
           }
         >
-          <div>sixth</div>
+          <div className="delta__field">
+            <span>Task Name </span>
+            <div className="target__table">
+              <FormControl sx={{ width: "100%" }} variant="standard">
+                <OutlinedInput
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
+                  style={{ width: "100%", backgroundColor: "transparent" }}
+                  placeholder="Please enter text"
+                />
+              </FormControl>
+            </div>
+          </div>
+          <div className="delta__field">
+            <span>Status </span>
+            <div className="target__table">
+              <div>
+                <FormControl component="fieldset" className="mw-120">
+                  <FormGroup aria-label="position" row>
+                    <FormControlLabel
+                      value="Drop"
+                      control={
+                        <Checkbox
+                          size="small"
+                          // value={dropValue}
+                          // onChange={(e) => {
+                          //   setDropValue(e.target.checked);
+                          //   console.log(e.target.checked);
+                          // }}
+                        />
+                      }
+                      label="Drop"
+                      labelPlacement="top"
+                    />
+                  </FormGroup>
+                </FormControl>
+              </div>
+            </div>
+          </div>
+
+          {/* <div>
+            <button onClick={handleJob}>submit job</button>
+          </div> */}
 
           <div className="btns-group">
             <a href="#" className="foobtn btn-prev" onClick={prevBtn}>

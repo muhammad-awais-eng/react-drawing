@@ -1,5 +1,5 @@
 import React from "react";
-import "./Tabletarget.css";
+import "./targerdragger.css";
 import { Draggable } from "react-beautiful-dnd";
 
 import Checkbox from "@mui/material/Checkbox";
@@ -60,21 +60,49 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const TargetTable = ({ todo, todos, setTodo, id, name, index }) => {
-  const [age, setAge] = React.useState("");
+const TargetDragger = ({
+  todo,
+  todos,
+  setTodos,
+  id,
+  name,
+  index,
+  upsertValue,
+  upsertKey,
+  setUpsertKey,
+  primaryKey,
+  setPrimaryKey,
+  dataTypes,
+}) => {
+  const [datatypes, setDatatypes] = React.useState("");
   const handleChange = (event) => {
-    setAge(event.target.value);
+    setDatatypes(event.target.value);
     let temp_state = [...todos];
     let temp_element = temp_state.map((el) =>
       el.id === id
         ? {
             ...el,
-            sourceEntitiesList: "awais",
+            datatypes: event.target.value,
           }
         : el
     );
-
+    setTodos(temp_element);
     console.log(temp_element, index);
+  };
+
+  const handleRuleChange = (event) => {
+    let temp_state = [...todos];
+    let temp_element = temp_state.map((el) =>
+      el.id === id
+        ? {
+            ...el,
+            rulesEngine: {
+              rule: event.target.value,
+            },
+          }
+        : el
+    );
+    setTodos(temp_element);
   };
 
   return (
@@ -93,21 +121,36 @@ const TargetTable = ({ todo, todos, setTodo, id, name, index }) => {
                 {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
                 <NativeSelect
                   id="demo-customized-select-native"
-                  value={age}
+                  value={datatypes}
                   onChange={handleChange}
                   input={<BootstrapInput />}
                 >
-                  <option aria-label="None" value="awais">
+                  <option aria-label="None" value="">
                     choose datatypes
                   </option>
-                  <option aria-label="None" value="dsad">
-                    mysql
-                  </option>
-                  <option aria-label="None" value="dsad">
-                    mssql
-                  </option>
+                  {dataTypes.map((el, idx) => {
+                    return (
+                      <option key={idx} value={el}>
+                        {el}
+                      </option>
+                    );
+                  })}
                 </NativeSelect>
               </FormControl>
+            </div>
+
+            <div className="delta__field">
+              <span>Rules Engine </span>
+              <div className="target__table">
+                <FormControl sx={{ width: "100%" }} variant="standard">
+                  <input
+                    type="text"
+                    value={todo.rulesEngine.rule}
+                    onChange={handleRuleChange}
+                    style={{ width: "100%", backgroundColor: "transparent" }}
+                  />
+                </FormControl>
+              </div>
             </div>
           </div>
         </div>
@@ -116,4 +159,4 @@ const TargetTable = ({ todo, todos, setTodo, id, name, index }) => {
   );
 };
 
-export default TargetTable;
+export default TargetDragger;

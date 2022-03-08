@@ -38,12 +38,13 @@
   justify-content: center;
   flex-wrap: wrap;
   padding: 5px;
+  width: 100%;
 }
 .field input {
   border: 1px solid rgb(197, 188, 188);
   border-radius: 4px;
   padding: 8px;
-  width: 300px;
+  width: 250px;
   height: 40px;
   align-items: flex-start;
   background-color: #263e58;
@@ -207,7 +208,7 @@
 .select {
   border-radius: 4px;
   padding: 0px;
-  width: 300px;
+  width: 250px;
   height: 40px;
   border: 1px solid rgb(160, 153, 153);
   align-items: flex-start;

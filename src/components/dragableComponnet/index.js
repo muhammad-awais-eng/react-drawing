@@ -4,37 +4,53 @@ import SourceTable from "./SourceTable";
 import axios from "axios";
 
 import "./style.css";
+
+const data = [
+  {
+    id: 1,
+    name: "test",
+  },
+  {
+    id: 2,
+    name: "test2",
+  },
+  {
+    id: 3,
+    name: "test3",
+  },
+];
+
 const DragableComponent = () => {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState(data);
   const [CompletedTodos, setCompletedTodos] = useState([]);
 
-  useEffect(() => {
-    try {
-      axios
-        .get("/v1/list_db_connections", {
-          headers: {
-            "X-User-ID": 1,
-            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
-          },
-        })
-        .then((response) => {
-          console.log(response.data.result_list);
-          console.log(Object.keys(response.data.result_list));
-          const data = Object.keys(response.data.result_list);
+  // useEffect(() => {
+  //   try {
+  //     axios
+  //       .get("/v1/list_db_connections", {
+  //         headers: {
+  //           "X-User-ID": 1,
+  //           "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+  //         },
+  //       })
+  //       .then((response) => {
+  //         console.log(response.data.result_list);
+  //         console.log(Object.keys(response.data.result_list));
+  //         const data = Object.keys(response.data.result_list);
 
-          data.map((item, index) => {
-            console.log(item);
-            setTodos((data) => [...data, { id: index, name: item }]);
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          alert("please check your credientials");
-        });
-    } catch (e) {
-      console.log(e);
-    }
-  }, []);
+  //         data.map((item, index) => {
+  //           console.log(item);
+  //           setTodos((data) => [...data, { id: index, name: item }]);
+  //         });
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //         alert("please check your credientials");
+  //       });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }, []);
 
   const onDragEnd = (result) => {
     const { destination, source } = result;

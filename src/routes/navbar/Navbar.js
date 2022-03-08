@@ -20,7 +20,7 @@ function Navbar() {
             <Link to="/dblist"> Connection List</Link>
           </div>
           <div className="nav__item">
-            <Link to="/list"> Connection screen </Link>
+            <Link to="/list"> Main screen </Link>
           </div>
           <div className="nav__item">
             <Link to="/mapping"> Mapping </Link>
