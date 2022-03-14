@@ -63,6 +63,7 @@ const OdmDrager = ({
   primaryKey,
   setPrimaryKey,
   dataTypes,
+  columnRules,
 }) => {
   // console.log("sds", todos, setTodos);
 
@@ -188,8 +189,8 @@ const OdmDrager = ({
                           </option>
                           {completedTodos?.map((todo, index) => {
                             return (
-                              <option key={index} value={todo.name}>
-                                {todo.name}
+                              <option key={index} value={todo.targetColumnName}>
+                                {todo.targetColumnName}
                               </option>
                             );
                           })}
@@ -216,8 +217,8 @@ const OdmDrager = ({
                         </option>
                         {completedTodos?.map((todo, index) => {
                           return (
-                            <option key={index} value={todo.name}>
-                              {todo.name}
+                            <option key={index} value={todo.targetColumnName}>
+                              {todo.targetColumnName}
                             </option>
                           );
                         })}
@@ -241,17 +242,13 @@ const OdmDrager = ({
                   primaryKey={primaryKey}
                   setPrimaryKey={setPrimaryKey}
                   dataTypes={dataTypes}
+                  columnRules={columnRules}
                 />
               ))}
               {provided.placeholder}
             </div>
           )}
         </Droppable>
-      </div>
-      <div className=" target__bottom_container">
-        <div>Left</div>
-
-        <div>Right</div>
       </div>
     </div>
   );

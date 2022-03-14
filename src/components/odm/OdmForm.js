@@ -77,10 +77,12 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function OdmForm() {
+function OdmForm(props) {
   const [formStepsNu, setformstepNu] = useState(0);
   const [progressActive, setprogressActive] = useState(0);
   const [progress, setprogress] = useState(0);
+
+  const [jobsList, setJobsList] = useState([]);
 
   const [sourcerDbList, setSourcerDbList] = useState([]);
   const [targetDbList, setTargetDbList] = useState([]);
@@ -107,7 +109,8 @@ function OdmForm() {
 
   const [sourceTable, setSourceTable] = React.useState("");
   const [targetTable, setTargetTable] = React.useState("");
-
+  const [queryExpression, setQueryExpression] = React.useState(null);
+  const [taskActive, setTaskActive] = React.useState(false);
   const [sourceColumn, setSourceColumn] = React.useState([]);
   const [targetColumn, setTargetColumn] = React.useState([]);
 
@@ -117,12 +120,13 @@ function OdmForm() {
   const [targetTableNames, setTargetTableName] = React.useState([]);
 
   const [datatypes, setdataTypes] = React.useState([]);
+  const [columnRules, setColumnRules] = React.useState([]);
 
   const [isdrop, setIsDrop] = React.useState(false);
   const [isTruncate, setIsTruncate] = React.useState(false);
   const [isUpsert, setIsUpsert] = React.useState(false);
-  const [upsertKey, setUpsertKey] = React.useState("");
-  const [primaryKey, setPrimaryKey] = React.useState("");
+  const [upsertKey, setUpsertKey] = React.useState(null);
+  const [primaryKey, setPrimaryKey] = React.useState(null);
 
   const [deltaFlow, setDeltaFlow] = React.useState("");
   const [delataColumn, setdelataColumn] = React.useState("");
@@ -137,6 +141,32 @@ function OdmForm() {
   const [executionEndTimestamp, setExecutionEndTimestamp] = React.useState("");
 
   const [taskName, setTaskName] = React.useState("");
+
+  const getAllJobs = async () => {
+    try {
+      axios
+        .get("/v1/list_task_mappings", {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          setJobsList(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("please check your credientials");
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getAllJobs();
+    console.log(props.jobType);
+  }, []);
 
   const handleSourceChange = (event) => {
     event.preventDefault();
@@ -156,7 +186,6 @@ function OdmForm() {
     setTargetConnectionName(value);
     setCheckTarrgetConnection(!checkTarrgetConnection);
   };
-
   const getDataTypes = async (dbName) => {
     try {
       axios
@@ -180,12 +209,29 @@ function OdmForm() {
       console.log(e);
     }
   };
-
-  // useEffect(() => {
-  //   if (sourceConnectionName.length > 0) {
-  //     SourceSchemaList(sourceConnectionName, sourceDBpassword);
-  //   }
-  // }, []);
+  const getColumnRules = async (dbName) => {
+    try {
+      axios
+        .get("v1/column_rules", {
+          params: {
+            database_name: dbName,
+          },
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log(response.data.entities_datatypes);
+          setColumnRules(response.data.column_rules);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -197,7 +243,6 @@ function OdmForm() {
           },
         })
         .then((response) => {
-          console.log(response.data.result_list);
           setDbData(response.data.result_list);
           const data = Object.keys(response.data.result_list);
           data.map((item, index) => {
@@ -234,7 +279,7 @@ function OdmForm() {
         .catch((error) => {
           console.log(error);
 
-          alert("please check your credientials");
+          // alert("please check your credientials");
         });
     } catch (e) {
       console.log(e);
@@ -301,7 +346,7 @@ function OdmForm() {
         .catch((error) => {
           console.log(error);
 
-          alert("please check your credientials");
+          // alert("please check your credientials");
         });
     } catch (e) {
       console.log(e);
@@ -312,6 +357,7 @@ function OdmForm() {
     const dbName = dbData[targetDbName].source_name;
     setTargetDBName(dbName);
     getDataTypes(dbName);
+    getColumnRules(dbName);
 
     try {
       axios
@@ -416,7 +462,8 @@ function OdmForm() {
               ...data,
               {
                 id: index,
-                name: item,
+                sourceColumnName: item,
+                targetColumnName: item,
                 datatypes: "",
                 rulesEngine: {
                   rule: "",
@@ -587,53 +634,63 @@ function OdmForm() {
   const handleJob = (e) => {
     e.preventDefault();
 
-    const body = {
-      task_mappings: {
-        process_groups: {},
-        process_individuals: [
-          {
-            task_name: taskName,
-            source_database_name: sourceDBName,
-            target_database_name: targetDBName,
-            source_schema_name: sourceSchema,
-            target_schema_name: targetSchema,
-            entity_name: sourceTable,
-            drop_p: isdrop ? 1 : 0,
-            truncate_p: isTruncate ? 1 : 0,
-            upsert_p: isUpsert ? 1 : 0,
-            upsert_key: upsertKey,
-            primary_key: primaryKey,
-            delta_configurations: {
-              delta_flow: deltaFlow,
-              delta_column: delataColumn,
-              delta_type: deltaType,
-              from_value: fromValue,
-              from_operator: fromOperator,
-              to_value: toValue,
-              to_operator: toOperator,
-              last_extracted_values: lastExtractedValues,
-              execution_start_timestamp: executionStartTimestamp,
-              execution_end_timestamp: executionEndTimestamp,
-            },
-            column_mapping: targetColumn?.map((item, idx) => {
-              return {
-                column_name: item.name,
-                data_type: item.datatypes,
-                rules_engine: item.rulesEngine,
-              };
-            }),
+    const jobs = jobsList;
+    const groupJob = jobs["process_groups"];
+    const individual = jobs["process_individuals"];
 
-            process_configurations: {
-              source_connection: sourceConnectionName,
-              source_encoded_password: sourceDBpassword,
-              target_connection: targetConnectionName,
-              target_encoded_password: targetDBpassword,
-              active_status: 1,
-            },
-          },
-        ],
+    individual.push({
+      task_name: taskName,
+      source_database_name: sourceDBName,
+      target_database_name: targetDBName,
+      source_schema_name: sourceSchema,
+      target_schema_name: targetSchema,
+      source_entity_name: sourceTable,
+      target_entity_name: targetTable,
+      query_expression: queryExpression,
+      drop_p: isdrop ? 1 : 0,
+      truncate_p: isTruncate ? 1 : 0,
+      upsert_p: isUpsert ? 1 : 0,
+      upsert_key: upsertKey,
+      primary_key: primaryKey,
+      delta_configurations: {
+        delta_flow: deltaFlow,
+        delta_column: delataColumn,
+        delta_type: deltaType,
+        from_value: fromValue,
+        from_operator: fromOperator,
+        to_value: toValue,
+        to_operator: toOperator,
+        last_extracted_values: lastExtractedValues,
+        execution_start_timestamp: executionStartTimestamp,
+        execution_end_timestamp: executionEndTimestamp,
       },
+      column_mapping: targetColumn?.map((item, idx) => {
+        return {
+          source_column_name: item.sourceColumnName,
+          target_column_name: item.targetColumnName,
+          data_type: item.datatypes,
+          rules_engine: item.rulesEngine["rule"].replace(
+            "<n>",
+            item.sourceColumnName
+          ),
+        };
+      }),
+
+      process_configurations: {
+        source_connection: sourceConnectionName,
+        source_encoded_password: sourceDBpassword,
+        target_connection: targetConnectionName,
+        target_encoded_password: targetDBpassword,
+        is_status: taskActive ? 1 : 0,
+      },
+    });
+    console.log(groupJob, "group", individual, "individual", jobs);
+
+    const body = {
+      process_groups: groupJob,
+      process_individuals: individual,
     };
+    console.log(body);
     try {
       axios
         .post("/v1/tasks_mapper_engine", body, {
@@ -651,12 +708,11 @@ function OdmForm() {
     } catch (e) {
       console.log(e);
     }
-
-    console.log(body);
   };
 
   return (
     <div>
+      {/* <Line x0={0} y0={0} x1={330} y1={330} /> */}
       {/* **********************************   <-- check source connection -->  **************************************** */}
       {checkSourceConnection ? (
         <div className="check__db__connection">
@@ -1296,6 +1352,7 @@ function OdmForm() {
                     primaryKey={primaryKey}
                     setPrimaryKey={setPrimaryKey}
                     dataTypes={datatypes}
+                    columnRules={columnRules}
                     sourceColumnList={sourceColumnList}
                   />
                 </div>
@@ -1533,7 +1590,7 @@ function OdmForm() {
             </a>
           </div>
         </div>
-        {/* *************************  <-- connection Name -->  ******************************************************************/}
+        {/* *************************  <-- Task Information -->  ******************************************************************/}
 
         <div
           className={
@@ -1553,6 +1610,20 @@ function OdmForm() {
               </FormControl>
             </div>
           </div>
+          <div className="delta__field">
+            <span>Query Expression</span>
+            <div className="target__table">
+              <FormControl sx={{ width: "100%" }} variant="standard">
+                <OutlinedInput
+                  value={queryExpression}
+                  onChange={(e) => setQueryExpression(e.target.value)}
+                  style={{ width: "100%", backgroundColor: "transparent" }}
+                  placeholder="Please enter text"
+                />
+              </FormControl>
+            </div>
+          </div>
+
           <div className="delta__field">
             <span>Status </span>
             <div className="target__table">

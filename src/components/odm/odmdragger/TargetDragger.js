@@ -73,6 +73,7 @@ const TargetDragger = ({
   primaryKey,
   setPrimaryKey,
   dataTypes,
+  columnRules,
 }) => {
   const [datatypes, setDatatypes] = React.useState("");
   const handleChange = (event) => {
@@ -105,6 +106,21 @@ const TargetDragger = ({
     setTodos(temp_element);
   };
 
+  const changeTargetColumnName = (event) => {
+    let temp_state = [...todos];
+    let temp_element = temp_state.map((el) =>
+      el.id === id
+        ? {
+            ...el,
+            targetColumnName: event.target.value,
+          }
+        : el
+    );
+    setTodos(temp_element);
+  };
+
+  console.log("todos", todo);
+
   return (
     <Draggable draggableId={todo.id.toString()} index={index}>
       {(provided, snapshot) => (
@@ -115,10 +131,22 @@ const TargetDragger = ({
           className={`todos__single ${snapshot.isDragging ? "drag" : ""}`}
         >
           <div className="newtable__row">
-            <div>{todo.name}</div>
+            <div className="target__table">
+              <FormControl
+                sx={{ width: "80%", height: "30px" }}
+                variant="standard"
+              >
+                <OutlinedInput
+                  value={todo.targetColumnName}
+                  onChange={changeTargetColumnName}
+                  style={{ width: "100%", backgroundColor: "transparent" }}
+                  placeholder="target Column"
+                />
+              </FormControl>
+            </div>
+
             <div className="target__table">
               <FormControl sx={{ width: "100%" }} variant="standard">
-                {/* <InputLabel htmlFor="demo-customized-select-native">Age</InputLabel> */}
                 <NativeSelect
                   id="demo-customized-select-native"
                   value={datatypes}
@@ -138,10 +166,30 @@ const TargetDragger = ({
                 </NativeSelect>
               </FormControl>
             </div>
-
-            <div className="delta__field">
+            <div className="target__table">
+              <FormControl sx={{ width: "100%" }} variant="standard">
+                <NativeSelect
+                  id="demo-customized-select-native"
+                  value={todo.rulesEngine.rule}
+                  onChange={handleRuleChange}
+                  input={<BootstrapInput />}
+                >
+                  <option aria-label="None" value="">
+                    choose column Rules
+                  </option>
+                  {columnRules.map((el, idx) => {
+                    return (
+                      <option key={idx} value={el}>
+                        {el}
+                      </option>
+                    );
+                  })}
+                </NativeSelect>
+              </FormControl>
+            </div>
+            {/* <div className="delta__field">
               <span>Rules Engine </span>
-              <div className="target__table">
+              <div className="target__tables">
                 <FormControl sx={{ width: "100%" }} variant="standard">
                   <input
                     type="text"
@@ -151,7 +199,7 @@ const TargetDragger = ({
                   />
                 </FormControl>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       )}

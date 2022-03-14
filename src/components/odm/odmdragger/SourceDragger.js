@@ -12,8 +12,8 @@ const SourceDragger = ({ todo, todos, setTodo, id, name, index }) => {
           {...provided.dragHandleProps}
           className={`todos__single ${snapshot.isDragging ? "drag" : ""}`}
         >
-          <div>{todo.id}</div>
-          <div>{todo.name}</div>
+          {/* <div>{todo.id}</div> */}
+          <div>{todo.sourceColumnName}</div>
         </div>
       )}
     </Draggable>

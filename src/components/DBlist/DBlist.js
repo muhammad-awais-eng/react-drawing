@@ -73,6 +73,7 @@ function DBlist() {
         })
         .then((response) => {
           setDbData(response.data.result_list);
+          console.log(response.data.result_list);
           const data = Object.keys(response.data.result_list);
           data.map((item, index) => {
             setDbCollection((data) => [...data, { id: index, name: item }]);
@@ -80,7 +81,6 @@ function DBlist() {
         })
         .catch((error) => {
           console.log(error);
-          alert("please check your credientials");
         });
     } catch (e) {
       console.log(e);

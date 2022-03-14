@@ -14,3 +14,21 @@
 .right__container {
   width: 80%;
 }
+.leftSourceColumn {
+  height: 30%;
+  overflow-y: auto;
+}
+.line {
+  color: bisque !important;
+  /* display: ; */
+  width: fit-content;
+  width: 20px;
+}
+.rightSourceColumn {
+  width: 30%;
+  height: 30px;
+  overflow-y: auto;
+  background-color: bisque;
+  display: flex;
+  flex-direction: row;
+}

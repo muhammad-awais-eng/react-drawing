@@ -10,6 +10,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import { useParams, useLocation } from "react-router-dom";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -22,7 +23,11 @@ const MenuProps = {
   },
 };
 
-const TestConncection = () => {
+const TestConncection = (props) => {
+  console.log(props, "props");
+  const testvalue = useLocation();
+  console.log("parm data ", testvalue);
+
   const [connectionData, setConnectionData] = useState({
     source_type: "",
     source_name: "",

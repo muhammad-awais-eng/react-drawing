@@ -14,7 +14,10 @@ function Navbar() {
         </div>
         <div className="rightOption">
           <div className="nav__item">
-            <Link to="/"> Connection screen </Link>
+            <Link to="/" state={{ testvalue: "hello" }}>
+              {" "}
+              Connection screen{" "}
+            </Link>
           </div>
           <div className="nav__item">
             <Link to="/dblist"> Connection List</Link>
