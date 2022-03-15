@@ -8,6 +8,7 @@ import TreeView from "@mui/lab/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TreeItem from "@mui/lab/TreeItem";
+import NativeSelect from "@mui/material/NativeSelect";
 
 import {
   TextField,
@@ -41,7 +42,41 @@ import IconButton from "@mui/material/IconButton";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import { ClassNames } from "@emotion/react";
+import InputBase from "@mui/material/InputBase";
+import { styled } from "@mui/material/styles";
+
+const BootstrapInput = styled(InputBase)(({ theme }) => ({
+  "label + &": {
+    marginTop: theme.spacing(3),
+  },
+  "& .MuiInputBase-input": {
+    borderRadius: 4,
+    position: "relative",
+    backgroundColor: theme.palette.background.paper,
+    border: "1px solid #ced4da",
+    fontSize: 16,
+    padding: "10px 26px 10px 12px",
+    transition: theme.transitions.create(["border-color", "box-shadow"]),
+    // Use the system font instead of the default Roboto font.
+    fontFamily: [
+      "-apple-system",
+      "BlinkMacSystemFont",
+      '"Segoe UI"',
+      "Roboto",
+      '"Helvetica Neue"',
+      "Arial",
+      "sans-serif",
+      '"Apple Color Emoji"',
+      '"Segoe UI Emoji"',
+      '"Segoe UI Symbol"',
+    ].join(","),
+    "&:focus": {
+      borderRadius: 4,
+      borderColor: "#80bdff",
+      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.25)",
+    },
+  },
+}));
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -90,8 +125,11 @@ const style = {
 };
 
 function TreeFile() {
-  const [addJobMode, setAddJobMode] = useState(true);
+  const [isGroupJobOpen, setIsGroupJobOpen] = useState(false);
+  const [isIndividualJobOpen, setIsIndividualJobOpen] = useState(false);
+  const [jobIndex, setJobIndex] = useState(0);
 
+  const [addJobMode, setAddJobMode] = useState(true);
   const [ShowDetails, setShowDetails] = useState(true);
 
   const [editJobDetail, setEditJobDetail] = useState(false);
@@ -121,15 +159,16 @@ function TreeFile() {
   const [primaryKey, setPrimaryKey] = useState("");
 
   const [deltaConfiguration, setDeltaConfiguration] = useState({
-    deltaFlow: "",
-    deltaColumn: null,
-    deltaType: "",
-    fromValue: "",
-    fromOperator: "",
-    toOperator: "",
-    lastExtractedValue: "",
-    executionStartTime: "",
-    executionEndTime: "",
+    delta_flow: "",
+    delta_column: null,
+    delta_type: "",
+    from_value: "",
+    from_operator: "",
+    to_value: "",
+    to_operator: "",
+    last_extracted_values: "",
+    execution_start_timestamp: "",
+    execution_end_timestamp: "",
   });
 
   const [columnMapping, setColumnMapping] = useState([]);
@@ -169,7 +208,31 @@ function TreeFile() {
 
   const [value, setValue] = React.useState(0);
   const [open, setOpen] = React.useState(false);
+  const [datatypes, setdataTypes] = React.useState([]);
 
+  const getDataTypes = async (dbName) => {
+    try {
+      axios
+        .get("v1/list_db_datatypes", {
+          params: {
+            database_name: targetDBName,
+          },
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log(response.data.entities_datatypes);
+          setdataTypes(response.data.entities_datatypes);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
   const handleModalOpen = () => {
     console.log(
       "open",
@@ -285,6 +348,9 @@ function TreeFile() {
 
   const loadGroupJob = (index) => {
     console.log(index);
+    setJobIndex(index);
+    setIsGroupJobOpen(true);
+    setIsIndividualJobOpen(false);
     const data = taskMapperEngine["process_groups"]["landings"][index];
     setTaskName(data["task_name"]);
     setSourceDBName(data["source_database_name"]);
@@ -309,6 +375,9 @@ function TreeFile() {
 
   const loadIndividualJob = (index) => {
     console.log(index);
+    setJobIndex(index);
+    setIsGroupJobOpen(false);
+    setIsIndividualJobOpen(true);
     const data = taskMapperEngine["process_individuals"][index];
     setTaskName(data["task_name"]);
     setSourceDBName(data["source_database_name"]);
@@ -361,6 +430,84 @@ function TreeFile() {
       source_type: targetdata["source_type"],
     });
     console.log(sourceConnection, targetConnection);
+  };
+
+  const upDateJobDetails = async (e) => {
+    let temp_state = taskMapperEngine;
+    let temp_element;
+    console.log(isGroupJobOpen);
+    if (isGroupJobOpen) {
+      temp_element = {
+        ...temp_state["process_groups"]["landings"][jobIndex],
+      };
+      temp_element["primary_key"] = primaryKey;
+      temp_element["upsert_key"] = upsertKey;
+      temp_element["query_expression"] = queryExpression;
+
+      temp_state["process_groups"]["landings"][jobIndex] = temp_element;
+    } else {
+      temp_element = { ...temp_state["process_individuals"][jobIndex] };
+
+      temp_element["primary_key"] = primaryKey;
+      temp_element["upsert_key"] = upsertKey;
+      temp_element["query_expression"] = queryExpression;
+      temp_state["process_individuals"][jobIndex] = temp_element;
+    }
+
+    console.log(temp_state);
+    try {
+      axios
+        .post("/v1/tasks_mapper_engine", temp_state, {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log("success post", response.data);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const updateDeltaConfiguration = async (e) => {
+    let temp_state = taskMapperEngine;
+    let temp_element;
+    console.log(isGroupJobOpen);
+    if (isGroupJobOpen) {
+      temp_element = {
+        ...temp_state["process_groups"]["landings"][jobIndex],
+      };
+      temp_element["delta_configurations"] = deltaConfiguration;
+      temp_state["process_groups"]["landings"][jobIndex] = temp_element;
+    } else {
+      temp_element = { ...temp_state["process_individuals"][jobIndex] };
+      temp_element["delta_configurations"] = deltaConfiguration;
+      temp_state["process_individuals"][jobIndex] = temp_element;
+    }
+
+    console.log(temp_state);
+    try {
+      axios
+        .post("/v1/tasks_mapper_engine", temp_state, {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log("success post", response.data);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -751,14 +898,6 @@ function TreeFile() {
                           justifyContent: "space-around",
                         }}
                       >
-                        {/* <SteppedLineTo
-                          borderColor="red"
-                          borderStyle="dashed"
-                          borderWidth="4px"
-                          from={column.source_column_name}
-                          to={column.target_column_name}
-                          orientation="v"
-                        /> */}
                         <LineTo
                           borderColor="#bbb"
                           borderStyle="dashed"
@@ -771,7 +910,7 @@ function TreeFile() {
                   : null}
               </div>
             </Box>
-            {/* bottom  container */}
+            {/*                                                                                          bottom  container */}
             <Box
               width="100%"
               component="form"
@@ -827,6 +966,9 @@ function TreeFile() {
                     {...a11yProps(1)}
                   />
                   <Tab
+                    onClick={() =>
+                      getDataTypes(TargetConnectionDetail["db_name"])
+                    }
                     sx={{
                       borderColor: "divider",
                       border: "1px solid #ddd",
@@ -907,7 +1049,7 @@ function TreeFile() {
                             justifyContent: "flex-end",
                           }}
                         >
-                          {editJobDetail ? (
+                          {!editJobDetail ? (
                             <Button
                               onClick={() => setEditJobDetail(!editJobDetail)}
                               size="small"
@@ -918,7 +1060,10 @@ function TreeFile() {
                             </Button>
                           ) : (
                             <Button
-                              onClick={() => setEditJobDetail(!editJobDetail)}
+                              onClick={() => {
+                                upDateJobDetails();
+                                // setEditJobDetail(!editJobDetail);
+                              }}
                               size="small"
                               variant="contained"
                               sx={{ m: 1 }}
@@ -1088,26 +1233,69 @@ function TreeFile() {
                           </Box>
                         ) : (
                           <Box>
-                            <TextField
+                            <FormControl
                               sx={{
                                 width: "51%",
                                 m: 1,
                               }}
-                              id="outlined-name"
-                              label="Primary Key"
-                              value={primaryKey}
-                              // onChange={handleChange}
-                            />
-                            <TextField
+                              variant="standard"
+                            >
+                              <NativeSelect
+                                id="demo-customized-select-native"
+                                value={primaryKey}
+                                onChange={(event) =>
+                                  setPrimaryKey(event.target.value)
+                                }
+                                input={<BootstrapInput />}
+                              >
+                                <option aria-label="None" value="">
+                                  choose Primary Key
+                                </option>
+
+                                {columnMapping.map((el, idx) => {
+                                  return (
+                                    <option
+                                      key={idx}
+                                      value={el.source_column_name}
+                                    >
+                                      {el.source_column_name}
+                                    </option>
+                                  );
+                                })}
+                              </NativeSelect>
+                            </FormControl>
+                            <FormControl
                               sx={{
                                 width: "51%",
                                 m: 1,
                               }}
-                              id="outlined-name"
-                              label="Upsert Key"
-                              value={upsertKey}
-                              // onChange={handleChange}
-                            />
+                              variant="standard"
+                            >
+                              <NativeSelect
+                                id="demo-customized-select-native"
+                                value={upsertKey}
+                                onChange={(event) =>
+                                  setUpsetKey(event.target.value)
+                                }
+                                input={<BootstrapInput />}
+                              >
+                                <option aria-label="None" value="">
+                                  choose UpsertKey
+                                </option>
+
+                                {columnMapping.map((el, idx) => {
+                                  return (
+                                    <option
+                                      key={idx}
+                                      value={el.target_column_name}
+                                    >
+                                      {el.target_column_name}
+                                    </option>
+                                  );
+                                })}
+                              </NativeSelect>
+                            </FormControl>
+
                             <TextField
                               sx={{
                                 width: "52%",
@@ -1118,6 +1306,9 @@ function TreeFile() {
                               multiline
                               rows={3}
                               value={queryExpression}
+                              onChange={(event) =>
+                                setQueryExpression(event.target.value)
+                              }
                             />
                           </Box>
                         )}
@@ -1423,555 +1614,734 @@ function TreeFile() {
                     }}
                   >
                     <h3>Delta Configuration</h3>
-                    <Button size="small" variant="contained">
-                      Save
-                    </Button>
+                    {editDeltaConfigurationDetail ? (
+                      <Button
+                        onClick={() =>
+                          setEditDeltaConfigurationDetail(
+                            !editDeltaConfigurationDetail
+                          )
+                        }
+                        size="small"
+                        variant="contained"
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          updateDeltaConfiguration();
+                          setEditDeltaConfigurationDetail(
+                            !editDeltaConfigurationDetail
+                          );
+                        }}
+                        size="small"
+                        variant="contained"
+                      >
+                        Save
+                      </Button>
+                    )}
                   </Box>
-                  <Box>
-                    <Box
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        // justifyContent: "space-evenly",
-                      }}
-                    >
+                  {editDeltaConfigurationDetail ? (
+                    <Box>
                       <Box
                         sx={{
-                          width: "25%",
-                          m: 1,
+                          width: "100%",
                           display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          borderRadius: "5px",
-                          overflow: "hidden",
+                          // justifyContent: "space-evenly",
                         }}
                       >
-                        <Typography
+                        <Box
                           sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
-                          }}
-                          py={0}
-                        >
-                          Delta Flow
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            alignItems: "center",
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
                             alignSelf: "center",
-                            width: "48%",
-                            fontSize: 13,
+                            alignItems: "center",
+                            borderRadius: "5px",
+                            overflow: "hidden",
                           }}
-                          py={0}
                         >
-                          {" "}
-                          {deltaConfiguration["delta_flow"]}
-                        </Typography>
-                        <IconButton
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Delta Flow
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              alignItems: "center",
+                              alignSelf: "center",
+                              width: "48%",
+                              fontSize: 13,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["delta_flow"]}
+                          </Typography>
+                        </Box>
+                        <Box
                           sx={{
-                            width: "10%",
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
                           }}
-                          onClick={handleModalOpen}
                         >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Delta Type
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["delta_type"]}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Delta Column
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 13,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["delta_column"]}
+                          </Typography>
+                        </Box>
                       </Box>
                       <Box
                         sx={{
-                          width: "25%",
-                          m: 1,
                           display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
                         }}
                       >
-                        <Typography
+                        <Box
                           sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
                           }}
-                          py={0}
                         >
-                          Delta Type
-                        </Typography>
-                        <Typography
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            From Value
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["from_value"]}
+                          </Typography>
+                        </Box>
+                        <Box
                           sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
                           }}
-                          py={0}
                         >
-                          {" "}
-                          {deltaConfiguration["delta_type"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            From Operator
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["from_operator"]}
+                          </Typography>
+                        </Box>
                       </Box>
                       <Box
                         sx={{
-                          width: "25%",
-                          m: 1,
                           display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
                         }}
                       >
-                        <Typography
+                        <Box
                           sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                            }}
+                            py={0}
+                          >
+                            To Value
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              ontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["to_value"]}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1.7,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            To Operator
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["to_operator"]}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Last Executed
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["last_extracted_values"]}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Execution Start Time
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["execution_start_timestamp"]}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "25%",
+                            m: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            border: "1px solid #E0E0E0",
+                            height: "40px",
+                            alignSelf: "center",
+                            alignItems: "center",
                             borderRadius: "5px",
+                            overflow: "hidden",
                           }}
-                          py={0}
                         >
-                          Delta Column
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 13,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["delta_column"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
+                          <Typography
+                            sx={{
+                              borderRight: "1px solid #E0E0E0",
+                              px: 1,
+                              py: 1,
+                              width: "35%",
+                              fontSize: 12,
+                              fontWeight: "bold",
+                              borderRadius: "5px",
+                            }}
+                            py={0}
+                          >
+                            Execution End Time
+                          </Typography>
+                          <Typography
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              width: "48%",
+                              fontSize: 12,
+                            }}
+                            py={0}
+                          >
+                            {" "}
+                            {deltaConfiguration["execution_end_timestamp"]}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
+                  ) : (
+                    <Box>
+                      <Box>
+                        <FormControl
                           sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
+                            width: "28%",
+                            m: 2,
                           }}
-                          py={0}
+                          variant="standard"
                         >
-                          From Value
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["from_value"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
+                          <NativeSelect
+                            id="demo-customized-select-native"
+                            value={deltaConfiguration["delta_flow"]}
+                            onChange={(e) =>
+                              setDeltaConfiguration({
+                                ...deltaConfiguration,
+                                delta_flow: e.target.value,
+                              })
+                            }
+                            input={<BootstrapInput />}
+                          >
+                            <option
+                              aria-label="None"
+                              value={deltaConfiguration["delta_flow"]}
+                            >
+                              {deltaConfiguration["delta_flow"]}
+                            </option>
+                            <option aria-label="None" value="one_time">
+                              one Time
+                            </option>
+                            <option aria-label="None" value="incremental">
+                              Incremental
+                            </option>
+                          </NativeSelect>
+                        </FormControl>
 
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
+                        {/* <TextField
                           sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
+                            width: "28%",
+                            m: 2,
                           }}
-                          py={0}
-                        >
-                          From Operator
-                        </Typography>
-                        <Typography
+                          required
+                          id="Delta flow"
+                          label="Delta flow"
+                          autoComplete="false"
+                          value={deltaConfiguration["delta_flow"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              delta_flow: e.target.value,
+                            })
+                          }
+                        /> */}
+
+                        <FormControl
                           sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
+                            width: "28%",
+                            m: 2,
                           }}
-                          py={0}
+                          variant="standard"
                         >
-                          {" "}
-                          {deltaConfiguration["from_operator"]}
-                        </Typography>
-                        <IconButton
+                          <NativeSelect
+                            id="demo-customized-select-native"
+                            value={deltaConfiguration["delta_type"]}
+                            onChange={(e) =>
+                              setDeltaConfiguration({
+                                ...deltaConfiguration,
+                                delta_type: e.target.value,
+                              })
+                            }
+                            input={<BootstrapInput />}
+                          >
+                            <option
+                              aria-label="None"
+                              value={deltaConfiguration["delta_flow"]}
+                            >
+                              {deltaConfiguration["delta_flow"]}
+                            </option>
+
+                            {datatypes.map((column) => {
+                              return (
+                                <option aria-label="None" value={column}>
+                                  {column}
+                                </option>
+                              );
+                            })}
+                          </NativeSelect>
+                        </FormControl>
+                        <TextField
                           sx={{
-                            width: "10%",
+                            width: "28%",
+                            m: 2,
                           }}
-                          onClick={handleModalOpen}
+                          required
+                          id="Delta Column"
+                          label="Delta Column"
+                          autoComplete="false"
+                          value={deltaConfiguration["delta_column"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              delta_column: e.target.value,
+                            })
+                          }
+                        />
+                      </Box>
+                      <Box>
+                        <TextField
+                          sx={{
+                            width: "28%",
+                            m: 2,
+                          }}
+                          required
+                          id="From Value"
+                          label="From Value"
+                          autoComplete="false"
+                          value={deltaConfiguration["from_value"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              from_value: e.target.value,
+                            })
+                          }
+                        />
+                        <FormControl
+                          sx={{ width: "28%", padding: 2 }}
+                          variant="standard"
                         >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
+                          <NativeSelect
+                            id="demo-customized-select-native"
+                            value={deltaConfiguration["from_operator"]}
+                            onChange={(e) =>
+                              setDeltaConfiguration({
+                                ...deltaConfiguration,
+                                from_operator: e.target.value,
+                              })
+                            }
+                            input={<BootstrapInput />}
+                          >
+                            <option
+                              aria-label="None"
+                              value={deltaConfiguration["from_operator"]}
+                            >
+                              {deltaConfiguration["from_operator"]}
+                            </option>
+                            <option aria-label="None" value=">">
+                              greater than
+                            </option>
+                            <option aria-label="None" value=">=">
+                              greater than equal
+                            </option>
+                            <option aria-label="None" value="<">
+                              less than
+                            </option>
+                            <option aria-label="None" value="<=">
+                              less than equal
+                            </option>
+                          </NativeSelect>
+                        </FormControl>
+                      </Box>
+                      <Box>
+                        <TextField
+                          sx={{
+                            width: "28%",
+                            m: 2,
+                          }}
+                          required
+                          id="To value"
+                          label="To Value"
+                          autoComplete="false"
+                          value={deltaConfiguration["to_value"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              to_value: e.target.value,
+                            })
+                          }
+                        />
+                        <FormControl
+                          sx={{ width: "28%", padding: 2 }}
+                          variant="standard"
+                        >
+                          <NativeSelect
+                            id="demo-customized-select-native"
+                            value={deltaConfiguration["to_operator"]}
+                            onChange={(e) =>
+                              setDeltaConfiguration({
+                                ...deltaConfiguration,
+                                to_operator: e.target.value,
+                              })
+                            }
+                            input={<BootstrapInput />}
+                          >
+                            <option
+                              aria-label="None"
+                              value={deltaConfiguration["to_operator"]}
+                            >
+                              {deltaConfiguration["to_operator"]}
+                            </option>
+                            <option aria-label="None" value=">">
+                              greater than
+                            </option>
+                            <option aria-label="None" value=">=">
+                              greater than equal
+                            </option>
+                            <option aria-label="None" value="<">
+                              less than
+                            </option>
+                            <option aria-label="None" value="<=">
+                              less than equal
+                            </option>
+                          </NativeSelect>
+                        </FormControl>
+                      </Box>
+                      <Box>
+                        <TextField
+                          sx={{
+                            width: "28%",
+                            m: 2,
+                          }}
+                          required
+                          id="Delta flow"
+                          label="Last Executed Value"
+                          autoComplete="false"
+                          value={deltaConfiguration["last_extracted_values"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              last_extracted_values: e.target.value,
+                            })
+                          }
+                        />
+                        <TextField
+                          sx={{
+                            width: "28%",
+                            m: 2,
+                          }}
+                          required
+                          id="Delta column"
+                          label="Execution start Time"
+                          autoComplete="false"
+                          value={
+                            deltaConfiguration["execution_start_timestamp"]
+                          }
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              execution_start_timestamp: e.target.value,
+                            })
+                          }
+                        />
+                        <TextField
+                          sx={{
+                            width: "28%",
+                            m: 2,
+                          }}
+                          required
+                          id="Delta type"
+                          label="Execution End Time"
+                          autoComplete="false"
+                          value={deltaConfiguration["execution_end_timestamp"]}
+                          onChange={(e) =>
+                            setDeltaConfiguration({
+                              ...deltaConfiguration,
+                              execution_end_timestamp: e.target.value,
+                            })
+                          }
+                        />
                       </Box>
                     </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                          }}
-                          py={0}
-                        >
-                          To Value
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            ontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["to_value"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1.7,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
-                          }}
-                          py={0}
-                        >
-                          To Operator
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["to_operator"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
-                          }}
-                          py={0}
-                        >
-                          Last Executed
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["last_extracted_values"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
-                          }}
-                          py={0}
-                        >
-                          Execution Start Time
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["execution_start_timestamp"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
-                      <Box
-                        sx={{
-                          width: "25%",
-                          m: 1,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          border: "1px solid #E0E0E0",
-                          height: "40px",
-                          alignSelf: "center",
-                          alignItems: "center",
-                          borderRadius: "5px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            borderRight: "1px solid #E0E0E0",
-                            px: 1,
-                            py: 1,
-                            width: "35%",
-                            fontSize: 12,
-                            fontWeight: "bold",
-                            borderRadius: "5px",
-                          }}
-                          py={0}
-                        >
-                          Execution End Time
-                        </Typography>
-                        <Typography
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            width: "48%",
-                            fontSize: 12,
-                          }}
-                          py={0}
-                        >
-                          {" "}
-                          {deltaConfiguration["execution_end_timestamp"]}
-                        </Typography>
-                        <IconButton
-                          sx={{
-                            width: "10%",
-                          }}
-                          onClick={handleModalOpen}
-                        >
-                          <EditIcon sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Box>
-
-                      {/* <TextField
-                    sx={{
-                      width: "28%",
-                      m: 2,
-                    }}
-                    required
-                    id="Delta flow"
-                    label="Last Executed Value"
-                    autoComplete="false"
-                  />
-                  <TextField
-                    sx={{
-                      width: "28%",
-                      m: 2,
-                    }}
-                    required
-                    id="Delta column"
-                    label="Execution start Time"
-                    autoComplete="false"
-                    // type={"number"}
-                  /> */}
-                      {/* <TextField
-                    sx={{
-                      width: "28%",
-                      m: 2,
-                    }}
-                    required
-                    id="Delta type"
-                    label="Execution End Time"
-                    autoComplete="false"
-                    // type={"number"}
-                  /> */}
-                    </Box>
-                  </Box>
+                  )}
                 </TabPanel>
                 <TabPanel
                   value={value}
@@ -2077,7 +2447,7 @@ function TreeFile() {
                             id="DB Name"
                             label="DB Name"
                             autoComplete="false"
-                          /> */}
+                          />
                             <Box
                               sx={{
                                 width: "100%",
