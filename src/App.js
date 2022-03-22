@@ -8,6 +8,8 @@ import DBlist from "./components/DBlist/DBlist";
 import Odm from "./components/odm/Odm";
 import OdmForm from "./components/odm/OdmForm";
 import TreeFile from "./components/treeFile/TreeFile";
+import ScreenDrag from "./components/ScreenDrag/ScreenDrag";
+import JobTesting from "./components/JobTEsting/JobTesting";
 
 function App() {
   return (
@@ -16,7 +18,7 @@ function App() {
       <Routes>
         <Route exact path="/" element={<TestConncection />}></Route>
         <Route path="/list" element={<TreeFile />}></Route>
-        <Route path="/mapping" element={<OdmForm />}></Route>
+        <Route path="/mapping" element={<JobTesting />}></Route>
         <Route path="/dblist" element={<DBlist />}></Route>
       </Routes>
     </BrowserRouter>

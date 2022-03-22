@@ -32,6 +32,7 @@ import Select from "@mui/material/Select";
 import NativeSelect from "@mui/material/NativeSelect";
 import InputBase from "@mui/material/InputBase";
 import InputAdornment from "@mui/material/InputAdornment";
+import { Button } from "@mui/material";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -111,8 +112,10 @@ function OdmForm(props) {
   const [targetTable, setTargetTable] = React.useState("");
   const [queryExpression, setQueryExpression] = React.useState(null);
   const [taskActive, setTaskActive] = React.useState(false);
+
   const [sourceColumn, setSourceColumn] = React.useState([]);
   const [targetColumn, setTargetColumn] = React.useState([]);
+  const [autoMappingColumn, setAutoMappingColumn] = useState(false);
 
   const [sourceColumnList, setSourceColumnList] = useState([]);
 
@@ -458,12 +461,15 @@ function OdmForm(props) {
 
           data.map((item, index) => {
             console.log(item);
+
             setSourceColumn((data) => [
               ...data,
               {
                 id: index,
                 sourceColumnName: item,
                 targetColumnName: item,
+                n: "",
+                n1: "",
                 datatypes: "",
                 rulesEngine: {
                   rule: "",
@@ -638,52 +644,107 @@ function OdmForm(props) {
     const groupJob = jobs["process_groups"];
     const individual = jobs["process_individuals"];
 
-    individual.push({
-      task_name: taskName,
-      source_database_name: sourceDBName,
-      target_database_name: targetDBName,
-      source_schema_name: sourceSchema,
-      target_schema_name: targetSchema,
-      source_entity_name: sourceTable,
-      target_entity_name: targetTable,
-      query_expression: queryExpression,
-      drop_p: isdrop ? 1 : 0,
-      truncate_p: isTruncate ? 1 : 0,
-      upsert_p: isUpsert ? 1 : 0,
-      upsert_key: upsertKey,
-      primary_key: primaryKey,
-      delta_configurations: {
-        delta_flow: deltaFlow,
-        delta_column: delataColumn,
-        delta_type: deltaType,
-        from_value: fromValue,
-        from_operator: fromOperator,
-        to_value: toValue,
-        to_operator: toOperator,
-        last_extracted_values: lastExtractedValues,
-        execution_start_timestamp: executionStartTimestamp,
-        execution_end_timestamp: executionEndTimestamp,
-      },
-      column_mapping: targetColumn?.map((item, idx) => {
-        return {
-          source_column_name: item.sourceColumnName,
-          target_column_name: item.targetColumnName,
-          data_type: item.datatypes,
-          rules_engine: item.rulesEngine["rule"].replace(
-            "<n>",
-            item.sourceColumnName
-          ),
-        };
-      }),
+    if (props.jobType === "group") {
+      groupJob["landings"].push({
+        task_name: taskName,
+        source_database_name: sourceDBName,
+        target_database_name: targetDBName,
+        source_schema_name: sourceSchema,
+        target_schema_name: targetSchema,
+        source_entity_name: sourceTable,
+        target_entity_name: targetTable,
+        query_expression: queryExpression,
+        drop_p: isdrop ? 1 : 0,
+        truncate_p: isTruncate ? 1 : 0,
+        upsert_p: isUpsert ? 1 : 0,
+        upsert_key: upsertKey,
+        primary_key: primaryKey,
+        delta_configurations: {
+          delta_flow: deltaFlow,
+          delta_column: delataColumn,
+          delta_type: deltaType,
+          from_value: fromValue,
+          from_operator: fromOperator,
+          to_value: toValue,
+          to_operator: toOperator,
+          last_extracted_values: lastExtractedValues,
+          execution_start_timestamp: executionStartTimestamp,
+          execution_end_timestamp: executionEndTimestamp,
+        },
+        column_mapping: targetColumn?.map((item, idx) => {
+          const datatype = item.datatypes
+            .replace("<n>", item.n)
+            .replace("<n1>", item.n1);
+          return {
+            source_column_name: item.sourceColumnName,
+            target_column_name: item.targetColumnName,
+            data_type: datatype,
+            rules_engine: item.rulesEngine["rule"].replace(
+              "<n>",
+              item.sourceColumnName
+            ),
+          };
+        }),
 
-      process_configurations: {
-        source_connection: sourceConnectionName,
-        source_encoded_password: sourceDBpassword,
-        target_connection: targetConnectionName,
-        target_encoded_password: targetDBpassword,
-        is_status: taskActive ? 1 : 0,
-      },
-    });
+        process_configurations: {
+          source_connection: sourceConnectionName,
+          source_encoded_password: sourceDBpassword,
+          target_connection: targetConnectionName,
+          target_encoded_password: targetDBpassword,
+          is_status: taskActive ? 1 : 0,
+        },
+      });
+    } else {
+      individual.push({
+        task_name: taskName,
+        source_database_name: sourceDBName,
+        target_database_name: targetDBName,
+        source_schema_name: sourceSchema,
+        target_schema_name: targetSchema,
+        source_entity_name: sourceTable,
+        target_entity_name: targetTable,
+        query_expression: queryExpression,
+        drop_p: isdrop ? 1 : 0,
+        truncate_p: isTruncate ? 1 : 0,
+        upsert_p: isUpsert ? 1 : 0,
+        upsert_key: upsertKey,
+        primary_key: primaryKey,
+        delta_configurations: {
+          delta_flow: deltaFlow,
+          delta_column: delataColumn,
+          delta_type: deltaType,
+          from_value: fromValue,
+          from_operator: fromOperator,
+          to_value: toValue,
+          to_operator: toOperator,
+          last_extracted_values: lastExtractedValues,
+          execution_start_timestamp: executionStartTimestamp,
+          execution_end_timestamp: executionEndTimestamp,
+        },
+        column_mapping: targetColumn?.map((item, idx) => {
+          const datatype = item.datatypes
+            .replace("<n>", item.n)
+            .replace("<n1>", item.n1);
+          return {
+            source_column_name: item.sourceColumnName,
+            target_column_name: item.targetColumnName,
+            data_type: datatype,
+            rules_engine: item.rulesEngine["rule"].replace(
+              "<n>",
+              item.sourceColumnName
+            ),
+          };
+        }),
+
+        process_configurations: {
+          source_connection: sourceConnectionName,
+          source_encoded_password: sourceDBpassword,
+          target_connection: targetConnectionName,
+          target_encoded_password: targetDBpassword,
+          is_status: taskActive ? 1 : 0,
+        },
+      });
+    }
     console.log(groupJob, "group", individual, "individual", jobs);
 
     const body = {
@@ -691,23 +752,23 @@ function OdmForm(props) {
       process_individuals: individual,
     };
     console.log(body);
-    // try {
-    //   axios
-    //     .post("/v1/tasks_mapper_engine", body, {
-    //       headers: {
-    //         "X-User-ID": 1,
-    //         "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
-    //       },
-    //     })
-    //     .then((response) => {
-    //       console.log("success post", response.data);
-    //     })
-    //     .catch((error) => {
-    //       console.log("error");
-    //     });
-    // } catch (e) {
-    //   console.log(e);
-    // }
+    try {
+      axios
+        .post("/v1/tasks_mapper_engine", body, {
+          headers: {
+            "X-User-ID": 1,
+            "X-Access-Token": "9GdJaJxa7O0B-mk0fxzYNw",
+          },
+        })
+        .then((response) => {
+          console.log("success post", response.data);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -1330,6 +1391,14 @@ function OdmForm(props) {
             "form-step " + (formStepsNu === 3 ? "form-step-active" : "")
           }
         >
+          <Button
+            onClick={() => {
+              setAutoMappingColumn(true);
+              setTargetColumn(sourceColumn);
+            }}
+          >
+            Auto Mapping
+          </Button>
           <div>
             <DragDropContext onDragEnd={onDragEnd}>
               <div>
@@ -1354,6 +1423,7 @@ function OdmForm(props) {
                     dataTypes={datatypes}
                     columnRules={columnRules}
                     sourceColumnList={sourceColumnList}
+                    autoMapping={autoMappingColumn}
                   />
                 </div>
               </div>

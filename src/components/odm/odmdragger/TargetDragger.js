@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./targerdragger.css";
 import { Draggable } from "react-beautiful-dnd";
 
@@ -6,7 +6,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
-
+import TextField from "@mui/material/TextField";
 import { useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { styled } from "@mui/material/styles";
@@ -74,8 +74,12 @@ const TargetDragger = ({
   setPrimaryKey,
   dataTypes,
   columnRules,
+  autoMapping,
 }) => {
   const [datatypes, setDatatypes] = React.useState("");
+  const [sizeN, setSizeN] = useState("");
+  const [sizeN1, setSizeN1] = useState("");
+
   const handleChange = (event) => {
     setDatatypes(event.target.value);
     let temp_state = [...todos];
@@ -84,6 +88,35 @@ const TargetDragger = ({
         ? {
             ...el,
             datatypes: event.target.value,
+          }
+        : el
+    );
+    setTodos(temp_element);
+    console.log(temp_element, index);
+  };
+
+  const handleSizeChange = (event) => {
+    setSizeN(event.target.value);
+    let temp_state = [...todos];
+    let temp_element = temp_state.map((el) =>
+      el.id === id
+        ? {
+            ...el,
+            n: event.target.value,
+          }
+        : el
+    );
+    setTodos(temp_element);
+    console.log(temp_element, index);
+  };
+  const handleSizeN1Change = (event) => {
+    setSizeN1(event.target.value);
+    let temp_state = [...todos];
+    let temp_element = temp_state.map((el) =>
+      el.id === id
+        ? {
+            ...el,
+            n1: event.target.value,
           }
         : el
     );
@@ -132,40 +165,81 @@ const TargetDragger = ({
         >
           <div className="newtable__row">
             <div className="target__table">
-              <FormControl
-                sx={{ width: "80%", height: "30px" }}
-                variant="standard"
-              >
+              <FormControl sx={{ width: "80%" }} variant="standard">
                 <OutlinedInput
                   value={todo.targetColumnName}
                   onChange={changeTargetColumnName}
-                  style={{ width: "100%", backgroundColor: "transparent" }}
+                  style={{
+                    width: "100%",
+                    backgroundColor: "transparent",
+                    height: "45px",
+                  }}
                   placeholder="target Column"
                 />
               </FormControl>
             </div>
-
-            <div className="target__table">
-              <FormControl sx={{ width: "100%" }} variant="standard">
-                <NativeSelect
-                  id="demo-customized-select-native"
-                  value={datatypes}
-                  onChange={handleChange}
-                  input={<BootstrapInput />}
+            {!autoMapping ? (
+              <div
+                className="target__table"
+                style={{ display: "block", flex: 1, marginRight: 2 }}
+              >
+                <FormControl sx={{ width: "100%" }} variant="standard">
+                  <NativeSelect
+                    id="demo-customized-select-native"
+                    value={datatypes}
+                    onChange={handleChange}
+                    input={<BootstrapInput />}
+                  >
+                    <option aria-label="None" value="">
+                      datatypes
+                    </option>
+                    {dataTypes.map((el, idx) => {
+                      return (
+                        <option key={idx} value={el}>
+                          {el}
+                        </option>
+                      );
+                    })}
+                  </NativeSelect>
+                </FormControl>
+                <div
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    marginTop: 10,
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <option aria-label="None" value="">
-                    choose datatypes
-                  </option>
-                  {dataTypes.map((el, idx) => {
-                    return (
-                      <option key={idx} value={el}>
-                        {el}
-                      </option>
-                    );
-                  })}
-                </NativeSelect>
-              </FormControl>
-            </div>
+                  <TextField
+                    style={{
+                      width: "100px",
+                      backgroundColor: "transparent",
+                      height: "30px",
+                    }}
+                    id="outlined-number"
+                    label="n"
+                    type="number"
+                    value={sizeN}
+                    onChange={handleSizeChange}
+                  />
+                  {datatypes.includes("<n1>") ? (
+                    <TextField
+                      style={{
+                        width: "100px",
+                        backgroundColor: "transparent",
+                        height: "30px",
+                      }}
+                      id="outlined-number"
+                      label="n1"
+                      type="number"
+                      value={sizeN1}
+                      onChange={handleSizeN1Change}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
             <div className="target__table">
               <FormControl sx={{ width: "100%" }} variant="standard">
                 <NativeSelect
@@ -175,7 +249,7 @@ const TargetDragger = ({
                   input={<BootstrapInput />}
                 >
                   <option aria-label="None" value="">
-                    choose column Rules
+                    Rule_Engine
                   </option>
                   {columnRules.map((el, idx) => {
                     return (
@@ -187,19 +261,6 @@ const TargetDragger = ({
                 </NativeSelect>
               </FormControl>
             </div>
-            {/* <div className="delta__field">
-              <span>Rules Engine </span>
-              <div className="target__tables">
-                <FormControl sx={{ width: "100%" }} variant="standard">
-                  <input
-                    type="text"
-                    value={todo.rulesEngine.rule}
-                    onChange={handleRuleChange}
-                    style={{ width: "100%", backgroundColor: "transparent" }}
-                  />
-                </FormControl>
-              </div>
-            </div> */}
           </div>
         </div>
       )}

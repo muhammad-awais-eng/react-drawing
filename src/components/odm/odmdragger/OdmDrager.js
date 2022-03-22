@@ -64,6 +64,7 @@ const OdmDrager = ({
   setPrimaryKey,
   dataTypes,
   columnRules,
+  autoMapping,
 }) => {
   // console.log("sds", todos, setTodos);
 
@@ -243,6 +244,7 @@ const OdmDrager = ({
                   setPrimaryKey={setPrimaryKey}
                   dataTypes={dataTypes}
                   columnRules={columnRules}
+                  autoMapping={autoMapping}
                 />
               ))}
               {provided.placeholder}

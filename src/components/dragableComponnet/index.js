@@ -98,14 +98,12 @@ const DragableComponent = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div>
-        <div>
-          <SourceTable
-            todos={todos}
-            setTodos={setTodos}
-            completedTodos={CompletedTodos}
-            setCompletedTodos={setCompletedTodos}
-          />
-        </div>
+        <SourceTable
+          todos={todos}
+          setTodos={setTodos}
+          completedTodos={CompletedTodos}
+          setCompletedTodos={setCompletedTodos}
+        />
       </div>
     </DragDropContext>
   );

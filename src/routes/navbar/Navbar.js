@@ -26,7 +26,7 @@ function Navbar() {
             <Link to="/list"> Main screen </Link>
           </div>
           <div className="nav__item">
-            <Link to="/mapping"> Mapping </Link>
+            <Link to="/mapping"> Job Testing </Link>
           </div>
         </div>
       </div>
